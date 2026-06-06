@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'amount_entry_screen.dart';
 import 'register_screen.dart';
-import 'scan_screen.dart';
 import 'settings_screen.dart';
 import 'transaction_history_screen.dart';
 import 'users_screen.dart';
@@ -89,7 +89,7 @@ class HomeScreen extends StatelessWidget {
     return GestureDetector(
       onTap: () => Navigator.push(
         context,
-        MaterialPageRoute(builder: (_) => const ScanScreen()),
+        MaterialPageRoute(builder: (_) => const AmountEntryScreen()),
       ),
       child: Container(
         width: double.infinity,

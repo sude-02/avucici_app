@@ -1,4 +1,3 @@
-import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:camera/camera.dart';
@@ -6,7 +5,9 @@ import '../services/camera_service.dart';
 import '../services/database_service.dart';
 
 class ScanScreen extends StatefulWidget {
-  const ScanScreen({super.key});
+  final double amount;
+
+  const ScanScreen({super.key, required this.amount});
 
   @override
   State<ScanScreen> createState() => _ScanScreenState();
@@ -72,17 +73,16 @@ class _ScanScreenState extends State<ScanScreen>
       final match = await _dbService.findBestMatch(
           result.embedding, _selectedHand);
       if (match != null) {
-        final amount = (Random().nextInt(46) + 5) * 10.0; // 50–500 TL
         await _dbService.saveTransaction(
           userName: match['name'] as String,
           userId: match['id'] as int?,
-          amount: amount,
+          amount: widget.amount,
           isSuccess: true,
           hand: _selectedHand,
           matchScore: match['score'] as double?,
         );
         HapticFeedback.heavyImpact();
-        _showSuccessSheet(match['name'], match['score'], amount);
+        _showSuccessSheet(match['name'], match['score'], widget.amount);
       } else {
         await _dbService.saveTransaction(
           userName: '—',
