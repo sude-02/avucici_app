@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'screens/home_screen.dart';
+import 'screens/permission_explanation_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -11,11 +13,16 @@ void main() async {
       statusBarIconBrightness: Brightness.light,
     ),
   );
-  runApp(const PalmPayApp());
+
+  final cameraStatus = await Permission.camera.status;
+
+  runApp(PalmPayApp(cameraGranted: cameraStatus.isGranted));
 }
 
 class PalmPayApp extends StatelessWidget {
-  const PalmPayApp({super.key});
+  final bool cameraGranted;
+
+  const PalmPayApp({super.key, required this.cameraGranted});
 
   @override
   Widget build(BuildContext context) {
@@ -30,7 +37,9 @@ class PalmPayApp extends StatelessWidget {
         useMaterial3: true,
         fontFamily: 'Roboto',
       ),
-      home: const HomeScreen(),
+      home: cameraGranted
+          ? const HomeScreen()
+          : const PermissionExplanationScreen(),
     );
   }
 }
