@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../services/database_service.dart';
+import '../widgets/empty_state.dart';
+import '../widgets/shimmer.dart';
 
 class PinScreen extends StatefulWidget {
   final double amount;
@@ -19,6 +21,7 @@ class _PinScreenState extends State<PinScreen> {
   String _pin = '';
   bool _isVerifying = false;
   bool _hasError = false;
+  bool _isLoadingUsers = true;
 
   @override
   void initState() {
@@ -28,7 +31,12 @@ class _PinScreenState extends State<PinScreen> {
 
   Future<void> _loadUsers() async {
     final users = await _dbService.getAllUsers();
-    if (mounted) setState(() => _users = users);
+    if (mounted) {
+      setState(() {
+        _users = users;
+        _isLoadingUsers = false;
+      });
+    }
   }
 
   void _tapPin(String key) {
@@ -225,11 +233,15 @@ class _PinScreenState extends State<PinScreen> {
                   fontSize: 14,
                   fontWeight: FontWeight.w600)),
         ),
-        if (_users.isEmpty)
+        if (_isLoadingUsers)
+          const Expanded(child: ShimmerUserListView(count: 3))
+        else if (_users.isEmpty)
           const Expanded(
-            child: Center(
-              child: Text('Kayıtlı kullanıcı yok',
-                  style: TextStyle(color: Colors.white54)),
+            child: EmptyStateWidget(
+              icon: Icons.lock_open_rounded,
+              iconColor: Color(0xFF6C63FF),
+              title: 'Kayıtlı kullanıcı yok',
+              subtitle: 'PIN doğrulaması için önce\nkayıt oluşturun.',
             ),
           )
         else

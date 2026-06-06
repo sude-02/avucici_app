@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import '../services/database_service.dart';
+import '../widgets/empty_state.dart';
+import '../widgets/shimmer.dart';
 
 class TransactionHistoryScreen extends StatefulWidget {
   const TransactionHistoryScreen({super.key});
@@ -118,25 +120,27 @@ class _TransactionHistoryScreenState
         ),
       ),
       body: _isLoading
-          ? const Center(
-              child: CircularProgressIndicator(color: Color(0xFF7C3AED)))
+          ? const ShimmerTransactionListView()
           : TabBarView(
               controller: _tabController,
               children: [
                 _buildList(_all),
-                _buildList(_all
-                    .where((t) => t['status'] == 'success')
-                    .toList()),
-                _buildList(_all
-                    .where((t) => t['status'] == 'failed')
-                    .toList()),
+                _buildList(
+                    _all.where((t) => t['status'] == 'success').toList(),
+                    successOnly: true),
+                _buildList(
+                    _all.where((t) => t['status'] == 'failed').toList(),
+                    failedOnly: true),
               ],
             ),
     );
   }
 
-  Widget _buildList(List<Map<String, dynamic>> items) {
-    if (items.isEmpty) return _buildEmpty();
+  Widget _buildList(List<Map<String, dynamic>> items,
+      {bool successOnly = false, bool failedOnly = false}) {
+    if (items.isEmpty) {
+      return _buildEmpty(successOnly: successOnly, failedOnly: failedOnly);
+    }
 
     final grouped = _groupByDate(items);
     return RefreshIndicator(
@@ -351,29 +355,28 @@ class _TransactionHistoryScreenState
     );
   }
 
-  Widget _buildEmpty() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.receipt_long_rounded,
-              size: 80, color: Colors.white.withAlpha(26)),
-          const SizedBox(height: 16),
-          Text(
-            'Henüz işlem yok',
-            style: TextStyle(
-                color: Colors.white.withAlpha(77),
-                fontSize: 18,
-                fontWeight: FontWeight.w600),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Ödeme yaptığınızda burada görünecek.',
-            style: TextStyle(
-                color: Colors.white.withAlpha(51), fontSize: 14),
-          ),
-        ],
-      ),
+  Widget _buildEmpty({bool successOnly = false, bool failedOnly = false}) {
+    if (successOnly) {
+      return const EmptyStateWidget(
+        icon: Icons.check_circle_outline_rounded,
+        iconColor: Color(0xFF10B981),
+        title: 'Başarılı işlem yok',
+        subtitle: 'Başarıyla tamamlanan ödemeler\nburada görünecek.',
+      );
+    }
+    if (failedOnly) {
+      return const EmptyStateWidget(
+        icon: Icons.cancel_outlined,
+        iconColor: Color(0xFFEF4444),
+        title: 'Başarısız işlem yok',
+        subtitle: 'Eşleşmeyen okuma girişimleri\nburada görünecek.',
+      );
+    }
+    return const EmptyStateWidget(
+      icon: Icons.receipt_long_rounded,
+      iconColor: Color(0xFF7C3AED),
+      title: 'Henüz işlem yok',
+      subtitle: 'İlk ödemenizi yaptıktan sonra\ntüm geçmiş burada listelenir.',
     );
   }
 }

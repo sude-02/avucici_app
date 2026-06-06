@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:camera/camera.dart';
 import '../services/camera_service.dart';
 import '../services/database_service.dart';
+import '../widgets/app_feedback.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -361,12 +362,11 @@ class _RegisterScreenState extends State<RegisterScreen>
   }
 
   void _showSnack(String msg, {bool isError = false}) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      content: Text(msg),
-      backgroundColor: isError ? Colors.red : const Color(0xFF10B981),
-      behavior: SnackBarBehavior.floating,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-    ));
+    if (isError) {
+      AppFeedback.error(context, msg);
+    } else {
+      AppFeedback.success(context, msg);
+    }
   }
 
   @override

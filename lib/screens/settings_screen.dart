@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
 import '../services/app_settings.dart';
 import '../services/database_service.dart';
+import '../widgets/app_feedback.dart';
 import 'privacy_policy_screen.dart';
 import 'terms_screen.dart';
 
@@ -79,23 +80,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     try {
       await DatabaseService().deleteAllData();
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: const Row(
-            children: [
-              Icon(Icons.check_circle_outline_rounded,
-                  color: Colors.white, size: 18),
-              SizedBox(width: 10),
-              Text('Tüm veriler silindi.',
-                  style: TextStyle(color: Colors.white)),
-            ],
-          ),
-          backgroundColor: const Color(0xFF059669),
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12)),
-        ),
-      );
+      AppFeedback.success(context, 'Tüm veriler başarıyla silindi.');
     } finally {
       if (mounted) setState(() => _isDeleting = false);
     }

@@ -3,7 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
 import '../services/camera_service.dart';
 import '../services/database_service.dart';
+import '../widgets/empty_state.dart';
+import '../widgets/shimmer.dart';
+import '../utils/app_routes.dart';
 import 'profile_screen.dart';
+import 'register_screen.dart';
 
 class UsersScreen extends StatefulWidget {
   const UsersScreen({super.key});
@@ -96,9 +100,7 @@ class _UsersScreenState extends State<UsersScreen> {
                 color: Colors.white, fontWeight: FontWeight.bold)),
       ),
       body: _isLoading
-          ? const Center(
-              child: CircularProgressIndicator(
-                  color: Color(0xFF6C63FF)))
+          ? const ShimmerUserListView()
           : _users.isEmpty
               ? _buildEmpty()
               : _buildList(),
@@ -106,18 +108,15 @@ class _UsersScreenState extends State<UsersScreen> {
   }
 
   Widget _buildEmpty() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.people_outline_rounded,
-              size: 80, color: Colors.white.withOpacity(0.1)),
-          const SizedBox(height: 16),
-          Text('Henüz kayıtlı kullanıcı yok',
-              style: TextStyle(
-                  color: Colors.white.withOpacity(0.3), fontSize: 16)),
-        ],
-      ),
+    return EmptyStateWidget(
+      icon: Icons.people_outline_rounded,
+      title: 'Kayıtlı kullanıcı yok',
+      subtitle: 'Avuç içi ödeme yapabilmek için önce\nkayıt oluşturun.',
+      actionLabel: 'Kayıt Ol',
+      onAction: () => Navigator.push(
+        context,
+        AppRoutes.push(const RegisterScreen()),
+      ).then((_) => _loadUsers()),
     );
   }
 

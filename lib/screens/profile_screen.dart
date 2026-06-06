@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../services/database_service.dart';
+import '../widgets/app_button.dart';
+import '../widgets/app_feedback.dart';
 
 class ProfileScreen extends StatefulWidget {
   final Map<String, dynamic> user;
@@ -84,14 +86,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   void _showSnack(String msg, {bool success = false}) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      content: Text(msg),
-      backgroundColor:
-          success ? const Color(0xFF10B981) : Colors.red.shade700,
-      behavior: SnackBarBehavior.floating,
-      shape:
-          RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-    ));
+    if (success) {
+      AppFeedback.success(context, msg);
+    } else {
+      AppFeedback.error(context, msg);
+    }
   }
 
   @override
@@ -395,32 +394,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Widget _buildSaveButton() {
-    return SizedBox(
-      width: double.infinity,
-      height: 54,
-      child: ElevatedButton(
-        style: ElevatedButton.styleFrom(
-          backgroundColor: const Color(0xFF6C63FF),
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          elevation: 0,
-        ),
-        onPressed: _isSaving ? null : _save,
-        child: _isSaving
-            ? const SizedBox(
-                width: 22,
-                height: 22,
-                child: CircularProgressIndicator(
-                    color: Colors.white, strokeWidth: 2),
-              )
-            : const Text(
-                'Değişiklikleri Kaydet',
-                style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold),
-              ),
-      ),
+    return AppButton(
+      label: 'Değişiklikleri Kaydet',
+      icon: Icons.save_rounded,
+      onPressed: _isSaving ? null : _save,
+      isLoading: _isSaving,
     );
   }
 }
