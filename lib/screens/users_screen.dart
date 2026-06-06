@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
 import '../services/camera_service.dart';
 import '../services/database_service.dart';
+import 'profile_screen.dart';
 
 class UsersScreen extends StatefulWidget {
   const UsersScreen({super.key});
@@ -68,6 +69,13 @@ class _UsersScreenState extends State<UsersScreen> {
         builder: (_) =>
             UserDetailScreen(user: user, dbService: _dbService),
       ),
+    ).then((_) => _loadUsers());
+  }
+
+  void _openUserProfile(Map<String, dynamic> user) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => ProfileScreen(user: user)),
     ).then((_) => _loadUsers());
   }
 
@@ -179,8 +187,12 @@ class _UsersScreenState extends State<UsersScreen> {
               trailing: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Icon(Icons.chevron_right_rounded,
-                      color: Colors.white24),
+                  IconButton(
+                    icon: const Icon(Icons.edit_rounded,
+                        color: Color(0xFF6C63FF), size: 20),
+                    tooltip: 'Profili düzenle',
+                    onPressed: () => _openUserProfile(user),
+                  ),
                   IconButton(
                     icon: const Icon(Icons.delete_outline_rounded,
                         color: Colors.red),

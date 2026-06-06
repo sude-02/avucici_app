@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
+import '../services/app_settings.dart';
 import '../services/database_service.dart';
 import 'privacy_policy_screen.dart';
 import 'terms_screen.dart';
@@ -14,6 +15,9 @@ class SettingsScreen extends StatefulWidget {
 class _SettingsScreenState extends State<SettingsScreen> {
   bool _cameraGranted = false;
   bool _isDeleting = false;
+  double _threshold = AppSettings.threshold;
+  bool _isDark = AppSettings.isDark;
+  String _language = AppSettings.language;
 
   @override
   void initState() {
@@ -119,6 +123,32 @@ class _SettingsScreenState extends State<SettingsScreen> {
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
         children: [
           _buildSection(
+            label: 'TANIMLAMA',
+            children: [
+              _buildThresholdTile(),
+            ],
+          ),
+          const SizedBox(height: 8),
+          _buildSection(
+            label: 'GÖRÜNÜM',
+            children: [
+              _buildToggleTile(
+                icon: Icons.dark_mode_rounded,
+                iconColor: const Color(0xFF6C63FF),
+                title: 'Koyu Tema',
+                subtitle: _isDark ? 'Koyu mod aktif' : 'Açık mod aktif',
+                value: _isDark,
+                onChanged: (v) async {
+                  setState(() => _isDark = v);
+                  await AppSettings.setDarkMode(v);
+                },
+              ),
+              _buildDivider(),
+              _buildLanguageTile(),
+            ],
+          ),
+          const SizedBox(height: 8),
+          _buildSection(
             label: 'İZİNLER',
             children: [
               _buildPermissionTile(),
@@ -206,6 +236,227 @@ class _SettingsScreenState extends State<SettingsScreen> {
           child: Column(children: children),
         ),
       ],
+    );
+  }
+
+  Widget _buildThresholdTile() {
+    final pct = (_threshold * 100).round();
+    String sensitivity;
+    Color sensitivityColor;
+    if (_threshold >= 0.80) {
+      sensitivity = 'Çok Yüksek';
+      sensitivityColor = Colors.green;
+    } else if (_threshold >= 0.70) {
+      sensitivity = 'Yüksek';
+      sensitivityColor = const Color(0xFF10B981);
+    } else if (_threshold >= 0.60) {
+      sensitivity = 'Orta';
+      sensitivityColor = const Color(0xFF6C63FF);
+    } else {
+      sensitivity = 'Düşük';
+      sensitivityColor = Colors.orange;
+    }
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 14, 16, 10),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 38, height: 38,
+                decoration: BoxDecoration(
+                  color: const Color(0xFF6C63FF).withAlpha(38),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: const Icon(Icons.tune_rounded,
+                    color: Color(0xFF6C63FF), size: 20),
+              ),
+              const SizedBox(width: 14),
+              const Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Avuç Tanıma Eşiği',
+                        style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 15,
+                            fontWeight: FontWeight.w500)),
+                    Text('Eşleşme hassasiyeti',
+                        style: TextStyle(color: Colors.white38, fontSize: 11)),
+                  ],
+                ),
+              ),
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: sensitivityColor.withAlpha(38),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  '$pct% · $sensitivity',
+                  style: TextStyle(
+                      color: sensitivityColor,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          SliderTheme(
+            data: SliderTheme.of(context).copyWith(
+              activeTrackColor: const Color(0xFF6C63FF),
+              inactiveTrackColor: Colors.white.withAlpha(26),
+              thumbColor: const Color(0xFF6C63FF),
+              overlayColor: const Color(0xFF6C63FF).withAlpha(38),
+              trackHeight: 4,
+            ),
+            child: Slider(
+              value: _threshold,
+              min: 0.40,
+              max: 0.95,
+              divisions: 11,
+              onChanged: (v) => setState(() => _threshold = v),
+              onChangeEnd: (v) => AppSettings.setThreshold(v),
+            ),
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text('Geniş (0.40)',
+                  style: TextStyle(
+                      color: Colors.white.withAlpha(77), fontSize: 10)),
+              Text('Hassas (0.95)',
+                  style: TextStyle(
+                      color: Colors.white.withAlpha(77), fontSize: 10)),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildToggleTile({
+    required IconData icon,
+    required Color iconColor,
+    required String title,
+    required String subtitle,
+    required bool value,
+    required ValueChanged<bool> onChanged,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      child: Row(
+        children: [
+          Container(
+            width: 38, height: 38,
+            decoration: BoxDecoration(
+              color: iconColor.withAlpha(38),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Icon(icon, color: iconColor, size: 20),
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(title,
+                    style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 15,
+                        fontWeight: FontWeight.w500)),
+                Text(subtitle,
+                    style: const TextStyle(
+                        color: Colors.white38, fontSize: 11)),
+              ],
+            ),
+          ),
+          Switch(
+            value: value,
+            onChanged: onChanged,
+            activeColor: const Color(0xFF6C63FF),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLanguageTile() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      child: Row(
+        children: [
+          Container(
+            width: 38, height: 38,
+            decoration: BoxDecoration(
+              color: const Color(0xFF3B82F6).withAlpha(38),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: const Icon(Icons.language_rounded,
+                color: Color(0xFF3B82F6), size: 20),
+          ),
+          const SizedBox(width: 14),
+          const Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Dil / Language',
+                    style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 15,
+                        fontWeight: FontWeight.w500)),
+                Text('Şimdilik sadece toggle',
+                    style:
+                        TextStyle(color: Colors.white38, fontSize: 11)),
+              ],
+            ),
+          ),
+          Row(
+            children: ['tr', 'en'].map((lang) {
+              final selected = _language == lang;
+              return GestureDetector(
+                onTap: () async {
+                  setState(() => _language = lang);
+                  await AppSettings.setLanguage(lang);
+                },
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 180),
+                  margin: const EdgeInsets.only(left: 6),
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 12, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: selected
+                        ? const Color(0xFF3B82F6).withAlpha(51)
+                        : Colors.white.withAlpha(13),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(
+                      color: selected
+                          ? const Color(0xFF3B82F6)
+                          : Colors.white.withAlpha(26),
+                    ),
+                  ),
+                  child: Text(
+                    lang.toUpperCase(),
+                    style: TextStyle(
+                      color: selected
+                          ? const Color(0xFF3B82F6)
+                          : Colors.white38,
+                      fontSize: 13,
+                      fontWeight: selected
+                          ? FontWeight.bold
+                          : FontWeight.normal,
+                    ),
+                  ),
+                ),
+              );
+            }).toList(),
+          ),
+        ],
+      ),
     );
   }
 

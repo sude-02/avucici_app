@@ -4,9 +4,29 @@ import 'register_screen.dart';
 import 'settings_screen.dart';
 import 'transaction_history_screen.dart';
 import 'users_screen.dart';
+import 'profile_screen.dart';
+import '../services/database_service.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  int _userCount = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserCount();
+  }
+
+  Future<void> _loadUserCount() async {
+    final users = await DatabaseService().getAllUsers();
+    if (mounted) setState(() => _userCount = users.length);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -53,6 +73,28 @@ class HomeScreen extends StatelessWidget {
                   color: Colors.white, size: 28),
             ),
             const Spacer(),
+            if (_userCount > 0)
+              IconButton(
+                icon: const Icon(Icons.manage_accounts_rounded,
+                    color: Colors.white54),
+                tooltip: 'Profil Yönet',
+                onPressed: () async {
+                  final users = await DatabaseService().getAllUsers();
+                  if (!context.mounted || users.isEmpty) return;
+                  if (users.length == 1) {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (_) => ProfileScreen(user: users.first)),
+                    ).then((_) => _loadUserCount());
+                  } else {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const UsersScreen()),
+                    ).then((_) => _loadUserCount());
+                  }
+                },
+              ),
             IconButton(
               icon: const Icon(Icons.settings_rounded, color: Colors.white38),
               onPressed: () => Navigator.push(

@@ -4,6 +4,7 @@ import 'dart:math';
 import 'package:crypto/crypto.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
+import 'app_settings.dart';
 
 const _createTransactionsTable = '''
   CREATE TABLE transactions (
@@ -183,6 +184,16 @@ class DatabaseService {
     return db.query('users', orderBy: 'created_at DESC');
   }
 
+  Future<void> updateUser(int id, String name, String hand) async {
+    final db = await database;
+    await db.update(
+      'users',
+      {'name': name, 'hand': hand},
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+  }
+
   Future<void> deleteUser(int id) async {
     final db = await database;
     await db.delete('samples', where: 'user_id = ?', whereArgs: [id]);
@@ -263,7 +274,7 @@ class DatabaseService {
       }
     }
 
-    if (bestUser == null || bestScore < 0.6) return null;
+    if (bestUser == null || bestScore < AppSettings.threshold) return null;
 
     return {
       'name': bestUser['name'],
