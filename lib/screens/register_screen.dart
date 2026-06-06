@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:camera/camera.dart';
 import '../services/camera_service.dart';
 import '../services/database_service.dart';
@@ -79,7 +80,7 @@ class _RegisterScreenState extends State<RegisterScreen>
           _angleGuides[_capturedCount]['done'] = true;
         }
         setState(() => _capturedCount++);
-        if (_capturedCount >= _requiredCount) await _saveUser();
+        if (_capturedCount >= _requiredCount) await _showPinSetupSheet();
       } else {
         _showSnack('El algılanamadı, tekrar deneyin', isError: true);
       }
@@ -90,16 +91,214 @@ class _RegisterScreenState extends State<RegisterScreen>
     }
   }
 
-  Future<void> _saveUser() async {
+  Future<void> _showPinSetupSheet() async {
+    String step1Pin = '';
+    String step2Pin = '';
+    int step = 1;
+    bool hasError = false;
+
+    await showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isDismissible: false,
+      isScrollControlled: true,
+      builder: (sheetCtx) {
+        return StatefulBuilder(builder: (_, setSheet) {
+          void tapKey(String key) {
+            HapticFeedback.selectionClick();
+            setSheet(() {
+              hasError = false;
+              final current = step == 1 ? step1Pin : step2Pin;
+              if (key == '⌫') {
+                final trimmed = current.isEmpty
+                    ? current
+                    : current.substring(0, current.length - 1);
+                if (step == 1) step1Pin = trimmed; else step2Pin = trimmed;
+                return;
+              }
+              if (current.length >= 6) return;
+              final next = current + key;
+              if (step == 1) {
+                step1Pin = next;
+                if (step1Pin.length == 6) step = 2;
+              } else {
+                step2Pin = next;
+                if (step2Pin.length == 6) {
+                  if (step1Pin == step2Pin) {
+                    Navigator.pop(sheetCtx, step1Pin);
+                  } else {
+                    step2Pin = '';
+                    hasError = true;
+                  }
+                }
+              }
+            });
+          }
+
+          final currentPin = step == 1 ? step1Pin : step2Pin;
+          const rows = [
+            ['1', '2', '3'],
+            ['4', '5', '6'],
+            ['7', '8', '9'],
+            ['', '0', '⌫'],
+          ];
+
+          return Container(
+            padding: EdgeInsets.only(
+              bottom: MediaQuery.of(sheetCtx).viewInsets.bottom,
+            ),
+            decoration: const BoxDecoration(
+              color: Color(0xFF1A1A2E),
+              borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(24, 24, 24, 32),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    width: 40, height: 4,
+                    decoration: BoxDecoration(
+                      color: Colors.white24,
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  const Icon(Icons.lock_rounded,
+                      color: Color(0xFF6C63FF), size: 32),
+                  const SizedBox(height: 12),
+                  Text(
+                    step == 1 ? 'PIN Oluşturun' : 'PIN\'i Onaylayın',
+                    style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    step == 1
+                        ? '6 haneli güvenlik PIN\'inizi belirleyin'
+                        : 'Aynı PIN\'i tekrar girin',
+                    style: TextStyle(
+                        color: Colors.white.withOpacity(0.5), fontSize: 13),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 24),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: List.generate(6, (i) {
+                      final filled = i < currentPin.length;
+                      return AnimatedContainer(
+                        duration: const Duration(milliseconds: 150),
+                        margin: const EdgeInsets.symmetric(horizontal: 8),
+                        width: 16,
+                        height: 16,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: filled
+                              ? (hasError
+                                  ? Colors.red
+                                  : const Color(0xFF6C63FF))
+                              : Colors.transparent,
+                          border: Border.all(
+                            color: filled
+                                ? (hasError
+                                    ? Colors.red
+                                    : const Color(0xFF6C63FF))
+                                : Colors.white.withOpacity(0.3),
+                            width: 2,
+                          ),
+                        ),
+                      );
+                    }),
+                  ),
+                  AnimatedOpacity(
+                    opacity: hasError ? 1.0 : 0.0,
+                    duration: const Duration(milliseconds: 200),
+                    child: const Padding(
+                      padding: EdgeInsets.only(top: 10),
+                      child: Text('PIN\'ler eşleşmedi, tekrar deneyin',
+                          style: TextStyle(color: Colors.red, fontSize: 12)),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  ...rows.map((row) {
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 8),
+                      child: Row(
+                        children: row.map((key) {
+                          return Expanded(
+                            child: Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 4),
+                              child: key.isEmpty
+                                  ? const SizedBox()
+                                  : Material(
+                                      color: Colors.transparent,
+                                      child: InkWell(
+                                        onTap: () => tapKey(key),
+                                        borderRadius: BorderRadius.circular(12),
+                                        child: Container(
+                                          height: 56,
+                                          decoration: BoxDecoration(
+                                            color: key == '⌫'
+                                                ? Colors.red.withAlpha(20)
+                                                : Colors.white.withAlpha(10),
+                                            borderRadius:
+                                                BorderRadius.circular(12),
+                                            border: Border.all(
+                                              color: key == '⌫'
+                                                  ? Colors.red.withAlpha(40)
+                                                  : Colors.white.withAlpha(13),
+                                            ),
+                                          ),
+                                          child: Center(
+                                            child: key == '⌫'
+                                                ? Icon(
+                                                    Icons.backspace_outlined,
+                                                    color: Colors.red
+                                                        .withAlpha(200),
+                                                    size: 20)
+                                                : Text(key,
+                                                    style: const TextStyle(
+                                                        color: Colors.white,
+                                                        fontSize: 22,
+                                                        fontWeight:
+                                                            FontWeight.w500)),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                            ),
+                          );
+                        }).toList(),
+                      ),
+                    );
+                  }),
+                ],
+              ),
+            ),
+          );
+        });
+      },
+    ).then((confirmedPin) async {
+      if (confirmedPin is String) {
+        await _saveUserWithPin(confirmedPin);
+      }
+    });
+  }
+
+  Future<void> _saveUserWithPin(String pin) async {
     setState(() => _isSaving = true);
     try {
-      await _dbService.saveUser(
+      final userId = await _dbService.saveUser(
         _nameController.text.trim(),
         _embeddings,
         _flippedEmbeddings,
         _imagePaths,
         _selectedHand,
       );
+      await _dbService.savePin(userId, pin);
       if (mounted) _showSuccessDialog();
     } catch (e) {
       _showSnack('Kayıt hatası: $e', isError: true);

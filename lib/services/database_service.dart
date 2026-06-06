@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
+import 'package:crypto/crypto.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 
@@ -29,7 +30,7 @@ class DatabaseService {
     final path = join(await getDatabasesPath(), 'palmpay.db');
     return openDatabase(
       path,
-      version: 4,
+      version: 5,
       onCreate: (db, _) async {
         await db.execute('''
           CREATE TABLE users (
@@ -38,6 +39,7 @@ class DatabaseService {
             embedding TEXT NOT NULL,
             flipped_embedding TEXT,
             hand TEXT NOT NULL DEFAULT 'sağ',
+            pin_hash TEXT,
             created_at TEXT NOT NULL
           )
         ''');
@@ -75,6 +77,9 @@ class DatabaseService {
         }
         if (oldVersion < 4) {
           await db.execute(_createTransactionsTable);
+        }
+        if (oldVersion < 5) {
+          try { await db.execute('ALTER TABLE users ADD COLUMN pin_hash TEXT'); } catch (_) {}
         }
       },
     );
@@ -275,6 +280,37 @@ class DatabaseService {
     }
     final n = embeddings.length.toDouble();
     return avg.map((v) => v / n).toList();
+  }
+
+  // ── PIN yönetimi ────────────────────────────────────────────────────
+
+  String _hashPin(String pin) {
+    final bytes = utf8.encode(pin);
+    return sha256.convert(bytes).toString();
+  }
+
+  Future<void> savePin(int userId, String pin) async {
+    final db = await database;
+    await db.update(
+      'users',
+      {'pin_hash': _hashPin(pin)},
+      where: 'id = ?',
+      whereArgs: [userId],
+    );
+  }
+
+  Future<bool> verifyUserPin(int userId, String pin) async {
+    final db = await database;
+    final rows = await db.query(
+      'users',
+      columns: ['pin_hash'],
+      where: 'id = ?',
+      whereArgs: [userId],
+    );
+    if (rows.isEmpty) return false;
+    final stored = rows.first['pin_hash'] as String?;
+    if (stored == null) return false;
+    return stored == _hashPin(pin);
   }
 
   double _cosineSimilarity(List<double> a, List<double> b) {

@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:camera/camera.dart';
 import '../services/camera_service.dart';
 import '../services/database_service.dart';
+import 'pin_screen.dart';
 
 class ScanScreen extends StatefulWidget {
   final double amount;
@@ -23,6 +24,7 @@ class _ScanScreenState extends State<ScanScreen>
   String _selectedHand = 'sağ';
   String _statusText = 'Hangi elinizi kullanacaksınız?';
   Color _statusColor = Colors.white70;
+  int _failCount = 0;
 
   late AnimationController _scanLineController;
   late Animation<double> _scanLineAnimation;
@@ -90,6 +92,7 @@ class _ScanScreenState extends State<ScanScreen>
           hand: _selectedHand,
         );
         HapticFeedback.vibrate();
+        setState(() => _failCount++);
         _updateStatus(
           '${_selectedHand == 'sağ' ? 'Sağ' : 'Sol'} el ile kayıtlı kullanıcı bulunamadı',
           Colors.red,
@@ -380,6 +383,34 @@ class _ScanScreenState extends State<ScanScreen>
                     ),
             ),
           ),
+          if (_failCount >= 3) ...[
+            const SizedBox(height: 10),
+            SizedBox(
+              width: double.infinity,
+              height: 52,
+              child: OutlinedButton.icon(
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: const Color(0xFFFBBF24),
+                  side: const BorderSide(color: Color(0xFFFBBF24), width: 1.5),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20)),
+                ),
+                icon: const Icon(Icons.pin_rounded, size: 20),
+                label: const Text(
+                  'PIN ile Devam Et',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                ),
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => PinScreen(amount: widget.amount),
+                    ),
+                  );
+                },
+              ),
+            ),
+          ],
         ],
       ),
     );
