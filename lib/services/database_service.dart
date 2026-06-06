@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 import 'dart:math';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
@@ -164,6 +165,20 @@ class DatabaseService {
     final db = await database;
     await db.delete('samples', where: 'user_id = ?', whereArgs: [id]);
     await db.delete('users', where: 'id = ?', whereArgs: [id]);
+  }
+
+  Future<void> deleteAllData() async {
+    final db = await database;
+    final samples = await db.query('samples', columns: ['image_path']);
+    for (final sample in samples) {
+      final path = sample['image_path'] as String?;
+      if (path != null) {
+        final file = File(path);
+        if (await file.exists()) await file.delete();
+      }
+    }
+    await db.delete('samples');
+    await db.delete('users');
   }
 
   // Eşleşme bul — sadece seçilen elle kayıtlı kullanıcılarla karşılaştır

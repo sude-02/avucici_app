@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'register_screen.dart';
 import 'scan_screen.dart';
+import 'settings_screen.dart';
 import 'users_screen.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -17,7 +18,7 @@ class HomeScreen extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const SizedBox(height: 48),
-              _buildHeader(),
+              _buildHeader(context),
               const SizedBox(height: 48),
               _buildMainButton(context),
               const SizedBox(height: 24),
@@ -32,20 +33,34 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildHeader() {
+  Widget _buildHeader(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Container(
-          width: 56,
-          height: 56,
-          decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              colors: [Color(0xFF6C63FF), Color(0xFF3B82F6)],
+        Row(
+          children: [
+            Container(
+              width: 56,
+              height: 56,
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  colors: [Color(0xFF6C63FF), Color(0xFF3B82F6)],
+                ),
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: const Icon(Icons.back_hand_rounded,
+                  color: Colors.white, size: 28),
             ),
-            borderRadius: BorderRadius.circular(16),
-          ),
-          child: const Icon(Icons.back_hand_rounded, color: Colors.white, size: 28),
+            const Spacer(),
+            IconButton(
+              icon: const Icon(Icons.settings_rounded, color: Colors.white38),
+              onPressed: () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (_) => const SettingsScreen()),
+              ),
+            ),
+          ],
         ),
         const SizedBox(height: 24),
         const Text(
