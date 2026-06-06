@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'scan_screen.dart';
+import '../utils/app_routes.dart';
 
 class AmountEntryScreen extends StatefulWidget {
   const AmountEntryScreen({super.key});
@@ -52,7 +53,7 @@ class _AmountEntryScreenState extends State<AmountEntryScreen> {
     HapticFeedback.mediumImpact();
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (_) => ScanScreen(amount: _parsed!)),
+      AppRoutes.push(ScanScreen(amount: _parsed!)),
     );
   }
 

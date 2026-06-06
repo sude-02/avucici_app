@@ -6,6 +6,7 @@ import 'transaction_history_screen.dart';
 import 'users_screen.dart';
 import 'profile_screen.dart';
 import '../services/database_service.dart';
+import '../utils/app_routes.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -84,13 +85,12 @@ class _HomeScreenState extends State<HomeScreen> {
                   if (users.length == 1) {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(
-                          builder: (_) => ProfileScreen(user: users.first)),
+                      AppRoutes.push(ProfileScreen(user: users.first)),
                     ).then((_) => _loadUserCount());
                   } else {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (_) => const UsersScreen()),
+                      AppRoutes.push(const UsersScreen()),
                     ).then((_) => _loadUserCount());
                   }
                 },
@@ -99,8 +99,7 @@ class _HomeScreenState extends State<HomeScreen> {
               icon: const Icon(Icons.settings_rounded, color: Colors.white38),
               onPressed: () => Navigator.push(
                 context,
-                MaterialPageRoute(
-                    builder: (_) => const SettingsScreen()),
+                AppRoutes.push(const SettingsScreen()),
               ),
             ),
           ],
@@ -131,7 +130,7 @@ class _HomeScreenState extends State<HomeScreen> {
     return GestureDetector(
       onTap: () => Navigator.push(
         context,
-        MaterialPageRoute(builder: (_) => const AmountEntryScreen()),
+        AppRoutes.push(const AmountEntryScreen()),
       ),
       child: Container(
         width: double.infinity,
@@ -191,9 +190,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 subtitle: 'Yeni kullanıcı',
                 color: const Color(0xFF10B981),
                 onTap: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const RegisterScreen()),
-                ),
+                  context, AppRoutes.push(const RegisterScreen())),
               ),
             ),
             const SizedBox(width: 16),
@@ -205,9 +202,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 subtitle: 'Kayıtlı kişiler',
                 color: const Color(0xFFF59E0B),
                 onTap: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const UsersScreen()),
-                ),
+                  context, AppRoutes.push(const UsersScreen())),
               ),
             ),
           ],
@@ -220,10 +215,7 @@ class _HomeScreenState extends State<HomeScreen> {
           subtitle: 'Tüm ödemeler',
           color: const Color(0xFF7C3AED),
           onTap: () => Navigator.push(
-            context,
-            MaterialPageRoute(
-                builder: (_) => const TransactionHistoryScreen()),
-          ),
+            context, AppRoutes.push(const TransactionHistoryScreen())),
         ),
       ],
     );

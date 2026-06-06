@@ -1,8 +1,11 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:camera/camera.dart';
 import '../services/camera_service.dart';
 import '../services/database_service.dart';
+import '../services/sound_service.dart';
+import '../widgets/result_animation.dart';
 import 'pin_screen.dart';
 
 class ScanScreen extends StatefulWidget {
@@ -25,6 +28,7 @@ class _ScanScreenState extends State<ScanScreen>
   String _statusText = 'Hangi elinizi kullanacaksınız?';
   Color _statusColor = Colors.white70;
   int _failCount = 0;
+  bool _showFailureOverlay = false;
 
   late AnimationController _scanLineController;
   late Animation<double> _scanLineAnimation;
@@ -84,6 +88,7 @@ class _ScanScreenState extends State<ScanScreen>
           matchScore: match['score'] as double?,
         );
         HapticFeedback.heavyImpact();
+        unawaited(SoundService().success());
         _showSuccessSheet(match['name'], match['score'], widget.amount);
       } else {
         await _dbService.saveTransaction(
@@ -91,12 +96,19 @@ class _ScanScreenState extends State<ScanScreen>
           isSuccess: false,
           hand: _selectedHand,
         );
-        HapticFeedback.vibrate();
-        setState(() => _failCount++);
+        HapticFeedback.heavyImpact();
+        unawaited(SoundService().error());
+        setState(() {
+          _failCount++;
+          _showFailureOverlay = true;
+        });
         _updateStatus(
           '${_selectedHand == 'sağ' ? 'Sağ' : 'Sol'} el ile kayıtlı kullanıcı bulunamadı',
           Colors.red,
         );
+        Future.delayed(const Duration(milliseconds: 1500), () {
+          if (mounted) setState(() => _showFailureOverlay = false);
+        });
       }
     } catch (e) {
       _updateStatus('Hata: $e', Colors.red);
@@ -123,14 +135,10 @@ class _ScanScreenState extends State<ScanScreen>
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Container(
-              width: 80, height: 80,
-              decoration: BoxDecoration(
-                color: const Color(0xFF10B981).withOpacity(0.2),
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(Icons.check_rounded,
-                  color: Color(0xFF10B981), size: 40),
+            const SizedBox(
+              width: 80,
+              height: 80,
+              child: AnimatedCheck(size: 80),
             ),
             const SizedBox(height: 16),
             const Text('Kimlik Doğrulandı',
@@ -233,6 +241,8 @@ class _ScanScreenState extends State<ScanScreen>
             ),
           ),
         ),
+        if (_showFailureOverlay)
+          const Positioned.fill(child: FailureOverlay()),
         SafeArea(
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
