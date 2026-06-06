@@ -4,6 +4,19 @@ import 'dart:math';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 
+const _createTransactionsTable = '''
+  CREATE TABLE transactions (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_name TEXT NOT NULL,
+    user_id INTEGER,
+    amount REAL,
+    status TEXT NOT NULL,
+    hand TEXT,
+    match_score REAL,
+    created_at TEXT NOT NULL
+  )
+''';
+
 class DatabaseService {
   static Database? _db;
 
@@ -16,7 +29,7 @@ class DatabaseService {
     final path = join(await getDatabasesPath(), 'palmpay.db');
     return openDatabase(
       path,
-      version: 3,
+      version: 4,
       onCreate: (db, _) async {
         await db.execute('''
           CREATE TABLE users (
@@ -39,6 +52,7 @@ class DatabaseService {
             FOREIGN KEY (user_id) REFERENCES users (id)
           )
         ''');
+        await db.execute(_createTransactionsTable);
       },
       onUpgrade: (db, oldVersion, newVersion) async {
         if (oldVersion < 2) {
@@ -58,6 +72,9 @@ class DatabaseService {
           try { await db.execute('ALTER TABLE users ADD COLUMN flipped_embedding TEXT'); } catch (_) {}
           try { await db.execute('ALTER TABLE users ADD COLUMN hand TEXT NOT NULL DEFAULT "sağ"'); } catch (_) {}
           try { await db.execute('ALTER TABLE samples ADD COLUMN flipped_embedding TEXT'); } catch (_) {}
+        }
+        if (oldVersion < 4) {
+          await db.execute(_createTransactionsTable);
         }
       },
     );
@@ -179,6 +196,39 @@ class DatabaseService {
     }
     await db.delete('samples');
     await db.delete('users');
+    await db.delete('transactions');
+  }
+
+  // ── İşlem geçmişi ──────────────────────────────────────────────────
+
+  Future<void> saveTransaction({
+    required String userName,
+    int? userId,
+    double? amount,
+    required bool isSuccess,
+    String? hand,
+    double? matchScore,
+  }) async {
+    final db = await database;
+    await db.insert('transactions', {
+      'user_name': userName,
+      'user_id': userId,
+      'amount': amount,
+      'status': isSuccess ? 'success' : 'failed',
+      'hand': hand,
+      'match_score': matchScore,
+      'created_at': DateTime.now().toIso8601String(),
+    });
+  }
+
+  Future<List<Map<String, dynamic>>> getTransactions() async {
+    final db = await database;
+    return db.query('transactions', orderBy: 'created_at DESC');
+  }
+
+  Future<void> clearTransactions() async {
+    final db = await database;
+    await db.delete('transactions');
   }
 
   // Eşleşme bul — sadece seçilen elle kayıtlı kullanıcılarla karşılaştır

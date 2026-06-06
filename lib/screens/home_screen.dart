@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'register_screen.dart';
 import 'scan_screen.dart';
 import 'settings_screen.dart';
+import 'transaction_history_screen.dart';
 import 'users_screen.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -136,33 +137,50 @@ class HomeScreen extends StatelessWidget {
   }
 
   Widget _buildSecondaryButtons(BuildContext context) {
-    return Row(
+    return Column(
       children: [
-        Expanded(
-          child: _buildSecondaryCard(
-            context,
-            icon: Icons.person_add_rounded,
-            label: 'Kayıt Ol',
-            subtitle: 'Yeni kullanıcı',
-            color: const Color(0xFF10B981),
-            onTap: () => Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => const RegisterScreen()),
+        Row(
+          children: [
+            Expanded(
+              child: _buildSecondaryCard(
+                context,
+                icon: Icons.person_add_rounded,
+                label: 'Kayıt Ol',
+                subtitle: 'Yeni kullanıcı',
+                color: const Color(0xFF10B981),
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const RegisterScreen()),
+                ),
+              ),
             ),
-          ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: _buildSecondaryCard(
+                context,
+                icon: Icons.people_rounded,
+                label: 'Kullanıcılar',
+                subtitle: 'Kayıtlı kişiler',
+                color: const Color(0xFFF59E0B),
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const UsersScreen()),
+                ),
+              ),
+            ),
+          ],
         ),
-        const SizedBox(width: 16),
-        Expanded(
-          child: _buildSecondaryCard(
+        const SizedBox(height: 16),
+        _buildSecondaryCard(
+          context,
+          icon: Icons.receipt_long_rounded,
+          label: 'İşlem Geçmişi',
+          subtitle: 'Tüm ödemeler',
+          color: const Color(0xFF7C3AED),
+          onTap: () => Navigator.push(
             context,
-            icon: Icons.people_rounded,
-            label: 'Kullanıcılar',
-            subtitle: 'Kayıtlı kişiler',
-            color: const Color(0xFFF59E0B),
-            onTap: () => Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => const UsersScreen()),
-            ),
+            MaterialPageRoute(
+                builder: (_) => const TransactionHistoryScreen()),
           ),
         ),
       ],

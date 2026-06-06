@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:camera/camera.dart';
@@ -71,9 +72,23 @@ class _ScanScreenState extends State<ScanScreen>
       final match = await _dbService.findBestMatch(
           result.embedding, _selectedHand);
       if (match != null) {
+        final amount = (Random().nextInt(46) + 5) * 10.0; // 50–500 TL
+        await _dbService.saveTransaction(
+          userName: match['name'] as String,
+          userId: match['id'] as int?,
+          amount: amount,
+          isSuccess: true,
+          hand: _selectedHand,
+          matchScore: match['score'] as double?,
+        );
         HapticFeedback.heavyImpact();
-        _showSuccessSheet(match['name'], match['score']);
+        _showSuccessSheet(match['name'], match['score'], amount);
       } else {
+        await _dbService.saveTransaction(
+          userName: '—',
+          isSuccess: false,
+          hand: _selectedHand,
+        );
         HapticFeedback.vibrate();
         _updateStatus(
           '${_selectedHand == 'sağ' ? 'Sağ' : 'Sol'} el ile kayıtlı kullanıcı bulunamadı',
@@ -91,7 +106,7 @@ class _ScanScreenState extends State<ScanScreen>
     if (mounted) setState(() { _statusText = text; _statusColor = color; });
   }
 
-  void _showSuccessSheet(String name, double score) {
+  void _showSuccessSheet(String name, double score, double amount) {
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
@@ -125,6 +140,12 @@ class _ScanScreenState extends State<ScanScreen>
             Text('Eşleşme: %${(score * 100).toStringAsFixed(1)}',
                 style: const TextStyle(
                     color: Color(0xFF10B981), fontSize: 16)),
+            const SizedBox(height: 4),
+            Text('₺${amount.toStringAsFixed(2)}',
+                style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold)),
             const SizedBox(height: 32),
             Container(
               padding: const EdgeInsets.all(20),
