@@ -393,212 +393,108 @@ class _RegisterScreenState extends State<RegisterScreen>
 
   Widget _buildBody() {
     final controller = _cameraService.controller!;
-    return Stack(
-      fit: StackFit.expand,
+    return Column(
       children: [
-        SizedBox.expand(
-          child: FittedBox(
-            fit: BoxFit.cover,
-            child: SizedBox(
-              width: controller.value.previewSize!.height,
-              height: controller.value.previewSize!.width,
-              child: CameraPreview(controller),
-            ),
-          ),
-        ),
-        AnimatedBuilder(
-          animation: _scanLineAnimation,
-          builder: (_, __) => CustomPaint(
-            painter: _SquarePalmPainter(
-              scanProgress: _isCapturing ? _scanLineAnimation.value : null,
-              isCapturing: _isCapturing,
-              capturedCount: _capturedCount,
-              requiredCount: _requiredCount,
-              handAngle: _capturedCount < _requiredCount
-                  ? (_angleGuides[_capturedCount]['handAngle'] as double)
-                  : 0.0,
-            ),
-          ),
-        ),
         SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            child: Row(
-              children: [
-                IconButton(
-                  icon: const Icon(Icons.arrow_back_ios_rounded,
-                      color: Colors.white),
-                  onPressed: () => Navigator.pop(context),
+          bottom: false,
+          child: _buildTopBar(),
+        ),
+        Expanded(
+          flex: 52,
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              FittedBox(
+                fit: BoxFit.cover,
+                child: SizedBox(
+                  width: controller.value.previewSize!.height,
+                  height: controller.value.previewSize!.width,
+                  child: CameraPreview(controller),
                 ),
-                const Spacer(),
-                const Text('Yeni Kayıt',
-                    style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold)),
-                const Spacer(),
-                StatefulBuilder(
-                  builder: (_, setS) => IconButton(
-                    icon: Icon(
-                      _cameraService.flashEnabled
-                          ? Icons.flash_on
-                          : Icons.flash_off,
-                      color: _cameraService.flashEnabled
-                          ? Colors.amber
-                          : Colors.white54,
-                    ),
-                    onPressed: () async {
-                      await _cameraService.toggleFlash();
-                      setS(() {});
-                      setState(() {});
-                    },
+              ),
+              AnimatedBuilder(
+                animation: _scanLineAnimation,
+                builder: (_, __) => CustomPaint(
+                  painter: _SquarePalmPainter(
+                    scanProgress: _isCapturing ? _scanLineAnimation.value : null,
+                    isCapturing: _isCapturing,
+                    capturedCount: _capturedCount,
+                    requiredCount: _requiredCount,
+                    handAngle: _capturedCount < _requiredCount
+                        ? (_angleGuides[_capturedCount]['handAngle'] as double)
+                        : 0.0,
                   ),
                 ),
-              ],
-            ),
+              ),
+              if (!_cameraService.flashEnabled && _capturedCount == 0)
+                Positioned(
+                  top: 8,
+                  left: 16,
+                  right: 16,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: Colors.amber.withOpacity(0.15),
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(color: Colors.amber.withOpacity(0.4)),
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.lightbulb_outline,
+                            color: Colors.amber, size: 16),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            'Daha iyi sonuç için flash açmanız önerilir',
+                            style: TextStyle(
+                                color: Colors.amber.withOpacity(0.9), fontSize: 12),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+            ],
           ),
         ),
-        if (!_cameraService.flashEnabled && _capturedCount == 0)
-          Positioned(
-            top: 90,
-            left: 24,
-            right: 24,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              decoration: BoxDecoration(
-                color: Colors.amber.withOpacity(0.15),
-                borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: Colors.amber.withOpacity(0.4)),
-              ),
-              child: Row(
-                children: [
-                  const Icon(Icons.lightbulb_outline,
-                      color: Colors.amber, size: 16),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      'Daha iyi sonuç için flash açmanız önerilir',
-                      style: TextStyle(
-                          color: Colors.amber.withOpacity(0.9), fontSize: 12),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        Positioned(
-          left: 0, right: 0, bottom: 0,
+        Expanded(
+          flex: 48,
           child: _buildBottomPanel(),
         ),
       ],
     );
   }
 
-  Widget _buildBottomPanel() {
-    final isDone = _capturedCount >= _requiredCount;
-    return Container(
-      padding: const EdgeInsets.fromLTRB(24, 20, 24, 40),
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.bottomCenter,
-          end: Alignment.topCenter,
-          colors: [Colors.black, Colors.transparent],
-        ),
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
+  Widget _buildTopBar() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+      child: Row(
         children: [
-          // El seçimi — sadece henüz tarama başlamadıysa göster
-          if (_capturedCount == 0) _buildHandSelector(),
-          if (_capturedCount == 0) const SizedBox(height: 12),
-          _buildAngleGuides(),
-          const SizedBox(height: 12),
-          Container(
-            decoration: BoxDecoration(
-              color: Colors.black54,
-              borderRadius: BorderRadius.circular(14),
-              border: Border.all(
-                  color: const Color(0xFF6C63FF).withOpacity(0.4)),
-            ),
-            child: TextField(
-              controller: _nameController,
-              style: const TextStyle(color: Colors.white),
-              decoration: InputDecoration(
-                hintText: 'Ad Soyad',
-                hintStyle: TextStyle(color: Colors.white.withOpacity(0.3)),
-                prefixIcon: const Icon(Icons.person_rounded,
-                    color: Color(0xFF6C63FF)),
-                border: InputBorder.none,
-                contentPadding: const EdgeInsets.all(14),
-              ),
+          IconButton(
+            icon: const Icon(Icons.arrow_back_ios_rounded, color: Colors.white),
+            onPressed: () => Navigator.pop(context),
+          ),
+          const Expanded(
+            child: Text(
+              'Avuç Kaydı',
+              style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold),
+              textAlign: TextAlign.center,
             ),
           ),
-          const SizedBox(height: 10),
-          Row(
-            children: List.generate(
-              _requiredCount,
-              (i) => Expanded(
-                child: Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 3),
-                  height: 5,
-                  decoration: BoxDecoration(
-                    color: i < _capturedCount
-                        ? const Color(0xFF10B981)
-                        : Colors.white.withOpacity(0.2),
-                    borderRadius: BorderRadius.circular(3),
-                  ),
-                ),
+          StatefulBuilder(
+            builder: (_, setS) => IconButton(
+              icon: Icon(
+                _cameraService.flashEnabled ? Icons.flash_on : Icons.flash_off,
+                color: _cameraService.flashEnabled ? Colors.amber : Colors.white54,
               ),
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            _capturedCount == 0
-                ? '${_selectedHand == 'sağ' ? 'Sağ' : 'Sol'} avucunu kareye tut ve butona bas'
-                : _capturedCount < _requiredCount
-                    ? 'Sıradaki açıyla tara • ${_requiredCount - _capturedCount} kaldı'
-                    : 'Tüm örnekler alındı, kaydediliyor...',
-            style: TextStyle(
-                color: Colors.white.withOpacity(0.6), fontSize: 12),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 10),
-          SizedBox(
-            width: double.infinity,
-            height: 58,
-            child: ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: isDone
-                    ? const Color(0xFF10B981)
-                    : const Color(0xFF6C63FF),
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(18)),
-                elevation: 0,
-              ),
-              onPressed:
-                  isDone || _isCapturing || _isSaving ? null : _captureEmbedding,
-              child: _isCapturing || _isSaving
-                  ? const CircularProgressIndicator(color: Colors.white)
-                  : Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                            isDone
-                                ? Icons.check_rounded
-                                : Icons.camera_alt_rounded,
-                            color: Colors.white),
-                        const SizedBox(width: 10),
-                        Text(
-                          isDone
-                              ? 'Kaydedildi!'
-                              : 'Avucu Tara ($_capturedCount/$_requiredCount)',
-                          style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold),
-                        ),
-                      ],
-                    ),
+              onPressed: () async {
+                await _cameraService.toggleFlash();
+                setS(() {});
+                setState(() {});
+              },
             ),
           ),
         ],
@@ -606,12 +502,133 @@ class _RegisterScreenState extends State<RegisterScreen>
     );
   }
 
+  Widget _buildBottomPanel() {
+    final isDone = _capturedCount >= _requiredCount;
+    return Container(
+      color: Colors.black,
+      child: SafeArea(
+        top: false,
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.fromLTRB(20, 14, 20, 0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildHandSelector(),
+              const SizedBox(height: 12),
+              Container(
+                decoration: BoxDecoration(
+                  color: const Color(0xFF1A1A2E),
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(
+                      color: const Color(0xFF6C63FF).withOpacity(0.3)),
+                ),
+                child: TextField(
+                  controller: _nameController,
+                  style: const TextStyle(color: Colors.white),
+                  decoration: InputDecoration(
+                    hintText: 'Ad Soyad',
+                    hintStyle:
+                        TextStyle(color: Colors.white.withOpacity(0.3)),
+                    prefixIcon: const Icon(Icons.person_rounded,
+                        color: Color(0xFF6C63FF), size: 20),
+                    border: InputBorder.none,
+                    contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16, vertical: 14),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
+              _buildAngleGuides(),
+              const SizedBox(height: 10),
+              Row(
+                children: List.generate(
+                  _requiredCount,
+                  (i) => Expanded(
+                    child: Container(
+                      margin: const EdgeInsets.symmetric(horizontal: 2),
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: i < _capturedCount
+                            ? const Color(0xFF10B981)
+                            : Colors.white.withOpacity(0.15),
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 6),
+              Center(
+                child: Text(
+                  _capturedCount == 0
+                      ? '${_selectedHand == 'sağ' ? 'Sağ' : 'Sol'} avucunu kareye tut ve butona bas'
+                      : _capturedCount < _requiredCount
+                          ? 'Sıradaki açıyla tara • ${_requiredCount - _capturedCount} kaldı'
+                          : 'Tüm örnekler alındı, kaydediliyor...',
+                  style: TextStyle(
+                      color: Colors.white.withOpacity(0.5), fontSize: 12),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+              const SizedBox(height: 10),
+              SizedBox(
+                width: double.infinity,
+                height: 52,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor:
+                        isDone ? const Color(0xFF10B981) : const Color(0xFF6C63FF),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16)),
+                    elevation: 0,
+                  ),
+                  onPressed: isDone || _isCapturing || _isSaving
+                      ? null
+                      : _captureEmbedding,
+                  child: _isCapturing || _isSaving
+                      ? const SizedBox(
+                          width: 22,
+                          height: 22,
+                          child: CircularProgressIndicator(
+                              color: Colors.white, strokeWidth: 2.5),
+                        )
+                      : Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                                isDone
+                                    ? Icons.check_rounded
+                                    : Icons.camera_alt_rounded,
+                                color: Colors.white),
+                            const SizedBox(width: 10),
+                            Text(
+                              isDone
+                                  ? 'Kaydedildi!'
+                                  : 'Avucu Tara ($_capturedCount/$_requiredCount)',
+                              style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold),
+                            ),
+                          ],
+                        ),
+                ),
+              ),
+              const SizedBox(height: 12),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _buildHandSelector() {
+    final locked = _capturedCount > 0;
     return Row(
       children: [
         Expanded(
           child: GestureDetector(
-            onTap: () => setState(() => _selectedHand = 'sol'),
+            onTap: locked ? null : () => setState(() => _selectedHand = 'sol'),
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 200),
               padding: const EdgeInsets.symmetric(vertical: 10),
@@ -662,7 +679,7 @@ class _RegisterScreenState extends State<RegisterScreen>
         const SizedBox(width: 10),
         Expanded(
           child: GestureDetector(
-            onTap: () => setState(() => _selectedHand = 'sağ'),
+            onTap: locked ? null : () => setState(() => _selectedHand = 'sağ'),
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 200),
               padding: const EdgeInsets.symmetric(vertical: 10),
@@ -712,6 +729,7 @@ class _RegisterScreenState extends State<RegisterScreen>
 
   Widget _buildAngleGuides() {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         if (_capturedCount < _requiredCount)
           Padding(
@@ -719,69 +737,73 @@ class _RegisterScreenState extends State<RegisterScreen>
             child: Text(
               _angleGuides[_capturedCount]['description'] as String,
               style: const TextStyle(
-                color: Colors.white,
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-              ),
+                  color: Colors.white70,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w500),
               textAlign: TextAlign.center,
             ),
           ),
         Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: List.generate(_requiredCount, (i) {
             final guide = _angleGuides[i];
             final isDone = i < _capturedCount;
-            final isCurrent = i == _capturedCount;
-            return Column(
-              children: [
-                Container(
-                  width: 44,
-                  height: 44,
+            final isCurrent = i == _capturedCount && _capturedCount < _requiredCount;
+            return Expanded(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 3),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(vertical: 7),
                   decoration: BoxDecoration(
                     color: isDone
-                        ? const Color(0xFF10B981).withOpacity(0.2)
+                        ? const Color(0xFF10B981).withOpacity(0.15)
                         : isCurrent
-                            ? const Color(0xFF6C63FF).withOpacity(0.2)
-                            : Colors.white.withOpacity(0.05),
-                    borderRadius: BorderRadius.circular(12),
+                            ? const Color(0xFF6C63FF).withOpacity(0.15)
+                            : Colors.white.withOpacity(0.04),
+                    borderRadius: BorderRadius.circular(10),
                     border: Border.all(
                       color: isDone
-                          ? const Color(0xFF10B981)
+                          ? const Color(0xFF10B981).withOpacity(0.5)
                           : isCurrent
                               ? const Color(0xFF6C63FF)
-                              : Colors.white.withOpacity(0.15),
-                      width: isCurrent ? 2 : 1,
+                              : Colors.white.withOpacity(0.08),
+                      width: isCurrent ? 1.5 : 1,
                     ),
                   ),
-                  child: isDone
-                      ? const Icon(Icons.check_rounded,
-                          color: Color(0xFF10B981), size: 22)
-                      : Transform.rotate(
-                          angle: guide['handAngle'] as double,
-                          child: Icon(
-                            Icons.back_hand_rounded,
-                            color: isCurrent
-                                ? const Color(0xFF6C63FF)
-                                : Colors.white.withOpacity(0.3),
-                            size: 22,
-                          ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      isDone
+                          ? const Icon(Icons.check_rounded,
+                              color: Color(0xFF10B981), size: 14)
+                          : Transform.rotate(
+                              angle: guide['handAngle'] as double,
+                              child: Icon(
+                                Icons.back_hand_rounded,
+                                color: isCurrent
+                                    ? const Color(0xFF6C63FF)
+                                    : Colors.white24,
+                                size: 14,
+                              ),
+                            ),
+                      const SizedBox(height: 3),
+                      Text(
+                        guide['label'] as String,
+                        style: TextStyle(
+                          color: isDone
+                              ? const Color(0xFF10B981)
+                              : isCurrent
+                                  ? Colors.white
+                                  : Colors.white24,
+                          fontSize: 9,
+                          fontWeight: isCurrent
+                              ? FontWeight.bold
+                              : FontWeight.normal,
                         ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  guide['label'] as String,
-                  style: TextStyle(
-                    color: isDone
-                        ? const Color(0xFF10B981)
-                        : isCurrent
-                            ? Colors.white
-                            : Colors.white.withOpacity(0.3),
-                    fontSize: 9,
-                    fontWeight:
-                        isCurrent ? FontWeight.bold : FontWeight.normal,
+                      ),
+                    ],
                   ),
                 ),
-              ],
+              ),
             );
           }),
         ),

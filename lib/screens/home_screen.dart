@@ -34,20 +34,20 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFF0A0A1A),
       body: SafeArea(
-        child: Padding(
+        child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 24.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const SizedBox(height: 48),
+              const SizedBox(height: 20),
               _buildHeader(context),
-              const SizedBox(height: 48),
-              _buildMainButton(context),
               const SizedBox(height: 24),
+              _buildMainButton(context),
+              const SizedBox(height: 16),
               _buildSecondaryButtons(context),
-              const Spacer(),
+              const SizedBox(height: 24),
               _buildFooter(),
-              const SizedBox(height: 32),
+              const SizedBox(height: 20),
             ],
           ),
         ),
@@ -178,44 +178,42 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildSecondaryButtons(BuildContext context) {
-    return Column(
+    return Row(
       children: [
-        Row(
-          children: [
-            Expanded(
-              child: _buildSecondaryCard(
-                context,
-                icon: Icons.person_add_rounded,
-                label: 'Kayıt Ol',
-                subtitle: 'Yeni kullanıcı',
-                color: const Color(0xFF10B981),
-                onTap: () => Navigator.push(
-                  context, AppRoutes.push(const RegisterScreen())),
-              ),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: _buildSecondaryCard(
-                context,
-                icon: Icons.people_rounded,
-                label: 'Kullanıcılar',
-                subtitle: 'Kayıtlı kişiler',
-                color: const Color(0xFFF59E0B),
-                onTap: () => Navigator.push(
-                  context, AppRoutes.push(const UsersScreen())),
-              ),
-            ),
-          ],
+        Expanded(
+          child: _buildSecondaryCard(
+            context,
+            icon: Icons.person_add_rounded,
+            label: 'Kayıt Ol',
+            subtitle: 'Yeni kullanıcı',
+            color: const Color(0xFF10B981),
+            onTap: () => Navigator.push(
+              context, AppRoutes.push(const RegisterScreen())),
+          ),
         ),
-        const SizedBox(height: 16),
-        _buildSecondaryCard(
-          context,
-          icon: Icons.receipt_long_rounded,
-          label: 'İşlem Geçmişi',
-          subtitle: 'Tüm ödemeler',
-          color: const Color(0xFF7C3AED),
-          onTap: () => Navigator.push(
-            context, AppRoutes.push(const TransactionHistoryScreen())),
+        const SizedBox(width: 12),
+        Expanded(
+          child: _buildSecondaryCard(
+            context,
+            icon: Icons.people_rounded,
+            label: 'Kullanıcılar',
+            subtitle: 'Kayıtlı kişiler',
+            color: const Color(0xFFF59E0B),
+            onTap: () => Navigator.push(
+              context, AppRoutes.push(const UsersScreen())),
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: _buildSecondaryCard(
+            context,
+            icon: Icons.receipt_long_rounded,
+            label: 'Geçmiş',
+            subtitle: 'Tüm ödemeler',
+            color: const Color(0xFF7C3AED),
+            onTap: () => Navigator.push(
+              context, AppRoutes.push(const TransactionHistoryScreen())),
+          ),
         ),
       ],
     );
@@ -232,7 +230,7 @@ class _HomeScreenState extends State<HomeScreen> {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        height: 120,
+        height: 90,
         decoration: BoxDecoration(
           color: const Color(0xFF1A1A2E),
           borderRadius: BorderRadius.circular(20),
@@ -241,22 +239,26 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, color: color, size: 32),
-            const SizedBox(height: 8),
+            Icon(icon, color: color, size: 26),
+            const SizedBox(height: 6),
             Text(
               label,
               style: const TextStyle(
                 color: Colors.white,
-                fontSize: 15,
+                fontSize: 13,
                 fontWeight: FontWeight.bold,
               ),
+              overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.center,
             ),
             Text(
               subtitle,
               style: TextStyle(
                 color: Colors.white.withOpacity(0.4),
-                fontSize: 12,
+                fontSize: 11,
               ),
+              overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.center,
             ),
           ],
         ),

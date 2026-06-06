@@ -17,8 +17,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
   bool _cameraGranted = false;
   bool _isDeleting = false;
   double _threshold = AppSettings.threshold;
-  bool _isDark = AppSettings.isDark;
-  String _language = AppSettings.language;
 
   @override
   void initState() {
@@ -111,25 +109,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
             label: 'TANIMLAMA',
             children: [
               _buildThresholdTile(),
-            ],
-          ),
-          const SizedBox(height: 8),
-          _buildSection(
-            label: 'GÖRÜNÜM',
-            children: [
-              _buildToggleTile(
-                icon: Icons.dark_mode_rounded,
-                iconColor: const Color(0xFF6C63FF),
-                title: 'Koyu Tema',
-                subtitle: _isDark ? 'Koyu mod aktif' : 'Açık mod aktif',
-                value: _isDark,
-                onChanged: (v) async {
-                  setState(() => _isDark = v);
-                  await AppSettings.setDarkMode(v);
-                },
-              ),
-              _buildDivider(),
-              _buildLanguageTile(),
             ],
           ),
           const SizedBox(height: 8),
@@ -318,127 +297,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   style: TextStyle(
                       color: Colors.white.withAlpha(77), fontSize: 10)),
             ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildToggleTile({
-    required IconData icon,
-    required Color iconColor,
-    required String title,
-    required String subtitle,
-    required bool value,
-    required ValueChanged<bool> onChanged,
-  }) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-      child: Row(
-        children: [
-          Container(
-            width: 38, height: 38,
-            decoration: BoxDecoration(
-              color: iconColor.withAlpha(38),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Icon(icon, color: iconColor, size: 20),
-          ),
-          const SizedBox(width: 14),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(title,
-                    style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 15,
-                        fontWeight: FontWeight.w500)),
-                Text(subtitle,
-                    style: const TextStyle(
-                        color: Colors.white38, fontSize: 11)),
-              ],
-            ),
-          ),
-          Switch(
-            value: value,
-            onChanged: onChanged,
-            activeColor: const Color(0xFF6C63FF),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildLanguageTile() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-      child: Row(
-        children: [
-          Container(
-            width: 38, height: 38,
-            decoration: BoxDecoration(
-              color: const Color(0xFF3B82F6).withAlpha(38),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: const Icon(Icons.language_rounded,
-                color: Color(0xFF3B82F6), size: 20),
-          ),
-          const SizedBox(width: 14),
-          const Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('Dil / Language',
-                    style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 15,
-                        fontWeight: FontWeight.w500)),
-                Text('Şimdilik sadece toggle',
-                    style:
-                        TextStyle(color: Colors.white38, fontSize: 11)),
-              ],
-            ),
-          ),
-          Row(
-            children: ['tr', 'en'].map((lang) {
-              final selected = _language == lang;
-              return GestureDetector(
-                onTap: () async {
-                  setState(() => _language = lang);
-                  await AppSettings.setLanguage(lang);
-                },
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 180),
-                  margin: const EdgeInsets.only(left: 6),
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 12, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: selected
-                        ? const Color(0xFF3B82F6).withAlpha(51)
-                        : Colors.white.withAlpha(13),
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(
-                      color: selected
-                          ? const Color(0xFF3B82F6)
-                          : Colors.white.withAlpha(26),
-                    ),
-                  ),
-                  child: Text(
-                    lang.toUpperCase(),
-                    style: TextStyle(
-                      color: selected
-                          ? const Color(0xFF3B82F6)
-                          : Colors.white38,
-                      fontSize: 13,
-                      fontWeight: selected
-                          ? FontWeight.bold
-                          : FontWeight.normal,
-                    ),
-                  ),
-                ),
-              );
-            }).toList(),
           ),
         ],
       ),

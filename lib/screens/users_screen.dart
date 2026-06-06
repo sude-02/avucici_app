@@ -127,76 +127,88 @@ class _UsersScreenState extends State<UsersScreen> {
       itemBuilder: (_, i) {
         final user = _users[i];
         final hand = user['hand'] as String? ?? 'sağ';
-        return GestureDetector(
-          onTap: () => _openUserDetail(user),
-          child: Container(
-            margin: const EdgeInsets.only(bottom: 12),
-            decoration: BoxDecoration(
-              color: const Color(0xFF1A1A2E),
-              borderRadius: BorderRadius.circular(16),
-              border:
-                  Border.all(color: Colors.white.withOpacity(0.05)),
-            ),
-            child: ListTile(
-              contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 20, vertical: 8),
-              leading: Container(
-                width: 48, height: 48,
-                decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                      colors: [Color(0xFF6C63FF), Color(0xFF3B82F6)]),
-                  borderRadius: BorderRadius.circular(14),
-                ),
-                child: Center(
-                  child: Text(
-                    user['name'][0].toUpperCase(),
-                    style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold),
-                  ),
-                ),
-              ),
-              title: Text(user['name'],
-                  style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600)),
-              subtitle: Row(
+        return Container(
+          margin: const EdgeInsets.only(bottom: 12),
+          decoration: BoxDecoration(
+            color: const Color(0xFF1A1A2E),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: Colors.white.withOpacity(0.05)),
+          ),
+          child: InkWell(
+            onTap: () => _openUserDetail(user),
+            borderRadius: BorderRadius.circular(16),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              child: Row(
                 children: [
-                  Icon(
-                    Icons.back_hand_rounded,
-                    size: 12,
-                    color: const Color(0xFF6C63FF).withOpacity(0.7),
+                  Container(
+                    width: 48,
+                    height: 48,
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                          colors: [Color(0xFF6C63FF), Color(0xFF3B82F6)]),
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    child: Center(
+                      child: Text(
+                        user['name'][0].toUpperCase(),
+                        style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold),
+                      ),
+                    ),
                   ),
-                  const SizedBox(width: 4),
-                  Text(
-                    '${hand == 'sağ' ? 'Sağ' : 'Sol'} el',
-                    style: TextStyle(
-                        color: const Color(0xFF6C63FF).withOpacity(0.7),
-                        fontSize: 12),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          user['name'],
+                          style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 15,
+                              fontWeight: FontWeight.w600),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        const SizedBox(height: 3),
+                        Row(
+                          children: [
+                            Icon(Icons.back_hand_rounded,
+                                size: 11,
+                                color: const Color(0xFF6C63FF).withOpacity(0.7)),
+                            const SizedBox(width: 4),
+                            Flexible(
+                              child: Text(
+                                '${hand == 'sağ' ? 'Sağ' : 'Sol'} el • Detaylar için dokun',
+                                style: TextStyle(
+                                    color: const Color(0xFF6C63FF).withOpacity(0.7),
+                                    fontSize: 12),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
-                  const SizedBox(width: 8),
-                  Text('• Detaylar için dokun',
-                      style: TextStyle(
-                          color: Colors.white.withOpacity(0.3),
-                          fontSize: 12)),
-                ],
-              ),
-              trailing: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
                   IconButton(
                     icon: const Icon(Icons.edit_rounded,
-                        color: Color(0xFF6C63FF), size: 20),
+                        color: Color(0xFF6C63FF), size: 19),
                     tooltip: 'Profili düzenle',
                     onPressed: () => _openUserProfile(user),
+                    visualDensity: VisualDensity.compact,
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
                   ),
                   IconButton(
                     icon: const Icon(Icons.delete_outline_rounded,
-                        color: Colors.red),
-                    onPressed: () =>
-                        _deleteUser(user['id'], user['name']),
+                        color: Colors.red, size: 19),
+                    onPressed: () => _deleteUser(user['id'], user['name']),
+                    visualDensity: VisualDensity.compact,
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
                   ),
                 ],
               ),
