@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../services/database_service.dart';
+import '../utils/app_theme.dart';
 import '../widgets/app_button.dart';
 import '../widgets/app_feedback.dart';
 
@@ -72,8 +73,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
     setState(() => _isSaving = true);
     try {
-      await _dbService.updateUser(
-          widget.user['id'] as int, name, _selectedHand);
+      await _dbService.updateUser(widget.user['id'] as int, name, _selectedHand);
       if (mounted) {
         _showSnack('Profil güncellendi', success: true);
         setState(() => _hasChanges = false);
@@ -96,17 +96,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF0A0A1A),
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_rounded, color: Colors.white),
+          icon: Icon(Icons.arrow_back_ios_rounded,
+              color: Theme.of(context).appBarTheme.iconTheme?.color),
           onPressed: () => Navigator.pop(context, _hasChanges),
         ),
-        title: const Text('Profil',
-            style:
-                TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+        title: const Text('Profil'),
         actions: [
           if (_hasChanges)
             TextButton(
@@ -124,13 +120,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
         child: Column(
           children: [
             const SizedBox(height: 32),
-            _buildAvatar(),
+            _buildAvatar(context),
             const SizedBox(height: 32),
-            _buildNameField(),
+            _buildNameField(context),
             const SizedBox(height: 20),
-            _buildHandSelector(),
+            _buildHandSelector(context),
             const SizedBox(height: 24),
-            _buildInfoCards(),
+            _buildInfoCards(context),
             const SizedBox(height: 32),
             if (_hasChanges) _buildSaveButton(),
             const SizedBox(height: 40),
@@ -140,7 +136,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget _buildAvatar() {
+  Widget _buildAvatar(BuildContext context) {
     return Column(
       children: [
         Stack(
@@ -157,7 +153,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 shape: BoxShape.circle,
                 boxShadow: [
                   BoxShadow(
-                    color: const Color(0xFF6C63FF).withOpacity(0.4),
+                    color: const Color(0xFF6C63FF).withOpacity(0.35),
                     blurRadius: 20,
                     offset: const Offset(0, 8),
                   ),
@@ -181,9 +177,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 width: 30,
                 height: 30,
                 decoration: BoxDecoration(
-                  color: const Color(0xFF1A1A2E),
+                  color: AppTheme.card(context),
                   shape: BoxShape.circle,
-                  border: Border.all(color: const Color(0xFF6C63FF), width: 2),
+                  border: Border.all(
+                      color: const Color(0xFF6C63FF), width: 2),
                 ),
                 child: const Icon(Icons.edit_rounded,
                     color: Color(0xFF6C63FF), size: 14),
@@ -194,21 +191,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
         const SizedBox(height: 12),
         Text(
           'Kayıt: $_createdAt',
-          style: TextStyle(
-              color: Colors.white.withOpacity(0.35), fontSize: 12),
+          style: TextStyle(color: AppTheme.textMuted(context), fontSize: 12),
         ),
       ],
     );
   }
 
-  Widget _buildNameField() {
+  Widget _buildNameField(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           'AD SOYAD',
           style: TextStyle(
-            color: Colors.white.withOpacity(0.4),
+            color: AppTheme.textMuted(context),
             fontSize: 11,
             fontWeight: FontWeight.w700,
             letterSpacing: 1.2,
@@ -217,23 +213,24 @@ class _ProfileScreenState extends State<ProfileScreen> {
         const SizedBox(height: 8),
         Container(
           decoration: BoxDecoration(
-            color: const Color(0xFF1A1A2E),
+            color: AppTheme.card(context),
             borderRadius: BorderRadius.circular(14),
             border: Border.all(
               color: _hasChanges
                   ? const Color(0xFF6C63FF).withOpacity(0.5)
-                  : Colors.white.withOpacity(0.08),
+                  : AppTheme.border(context),
             ),
           ),
           child: TextField(
             controller: _nameController,
-            style: const TextStyle(
-                color: Colors.white, fontSize: 16, fontWeight: FontWeight.w500),
+            style: TextStyle(
+                color: AppTheme.text(context),
+                fontSize: 16,
+                fontWeight: FontWeight.w500),
             textCapitalization: TextCapitalization.words,
             decoration: InputDecoration(
               hintText: 'İsim Soyisim',
-              hintStyle:
-                  TextStyle(color: Colors.white.withOpacity(0.25)),
+              hintStyle: TextStyle(color: AppTheme.textMuted(context)),
               prefixIcon: const Icon(Icons.person_rounded,
                   color: Color(0xFF6C63FF), size: 20),
               border: InputBorder.none,
@@ -246,14 +243,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget _buildHandSelector() {
+  Widget _buildHandSelector(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           'KAYITLI EL',
           style: TextStyle(
-            color: Colors.white.withOpacity(0.4),
+            color: AppTheme.textMuted(context),
             fontSize: 11,
             fontWeight: FontWeight.w700,
             letterSpacing: 1.2,
@@ -262,16 +259,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
         const SizedBox(height: 8),
         Row(
           children: [
-            Expanded(child: _handOption('sol', 'Sol El', flipIcon: true)),
+            Expanded(child: _handOption(context, 'sol', 'Sol El', flipIcon: true)),
             const SizedBox(width: 12),
-            Expanded(child: _handOption('sağ', 'Sağ El')),
+            Expanded(child: _handOption(context, 'sağ', 'Sağ El')),
           ],
         ),
       ],
     );
   }
 
-  Widget _handOption(String hand, String label, {bool flipIcon = false}) {
+  Widget _handOption(BuildContext context, String hand, String label,
+      {bool flipIcon = false}) {
     final selected = _selectedHand == hand;
     return GestureDetector(
       onTap: () {
@@ -283,13 +281,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
         padding: const EdgeInsets.symmetric(vertical: 14),
         decoration: BoxDecoration(
           color: selected
-              ? const Color(0xFF6C63FF).withOpacity(0.15)
-              : const Color(0xFF1A1A2E),
+              ? const Color(0xFF6C63FF).withOpacity(0.12)
+              : AppTheme.card(context),
           borderRadius: BorderRadius.circular(14),
           border: Border.all(
             color: selected
                 ? const Color(0xFF6C63FF)
-                : Colors.white.withOpacity(0.08),
+                : AppTheme.border(context),
             width: selected ? 2 : 1,
           ),
         ),
@@ -298,10 +296,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
           children: [
             Transform(
               alignment: Alignment.center,
-              transform: flipIcon ? (Matrix4.identity()..scale(-1.0, 1.0)) : Matrix4.identity(),
+              transform: flipIcon
+                  ? (Matrix4.identity()..scale(-1.0, 1.0))
+                  : Matrix4.identity(),
               child: Icon(
                 Icons.back_hand_rounded,
-                color: selected ? const Color(0xFF6C63FF) : Colors.white38,
+                color: selected
+                    ? const Color(0xFF6C63FF)
+                    : AppTheme.textMuted(context),
                 size: 18,
               ),
             ),
@@ -309,7 +311,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             Text(
               label,
               style: TextStyle(
-                color: selected ? Colors.white : Colors.white38,
+                color: selected ? AppTheme.text(context) : AppTheme.textMuted(context),
                 fontSize: 14,
                 fontWeight:
                     selected ? FontWeight.bold : FontWeight.normal,
@@ -321,33 +323,33 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget _buildInfoCards() {
+  Widget _buildInfoCards(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0xFF1A1A2E),
+        color: AppTheme.card(context),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white.withOpacity(0.06)),
+        border: Border.all(color: AppTheme.border(context)),
       ),
       child: Column(
         children: [
-          _infoRow(
+          _infoRow(context,
             icon: Icons.fingerprint_rounded,
             iconColor: const Color(0xFF6C63FF),
             label: 'Biyometrik Veri',
             value: 'Kayıtlı',
           ),
-          Divider(height: 1, color: Colors.white.withOpacity(0.06), indent: 56),
-          _infoRow(
+          Divider(height: 1, color: AppTheme.border(context), indent: 56),
+          _infoRow(context,
             icon: Icons.lock_rounded,
             iconColor: _hasPinSet ? const Color(0xFF10B981) : Colors.orange,
             label: 'PIN Durumu',
             value: _hasPinSet ? 'Tanımlı' : 'Tanımlı değil',
             valueColor: _hasPinSet ? const Color(0xFF10B981) : Colors.orange,
           ),
-          Divider(height: 1, color: Colors.white.withOpacity(0.06), indent: 56),
-          _infoRow(
+          Divider(height: 1, color: AppTheme.border(context), indent: 56),
+          _infoRow(context,
             icon: Icons.calendar_today_rounded,
-            iconColor: Colors.white38,
+            iconColor: AppTheme.textMuted(context),
             label: 'Kayıt Tarihi',
             value: _createdAt,
           ),
@@ -356,7 +358,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget _infoRow({
+  Widget _infoRow(BuildContext context, {
     required IconData icon,
     required Color iconColor,
     required String label,
@@ -368,8 +370,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       child: Row(
         children: [
           Container(
-            width: 36,
-            height: 36,
+            width: 36, height: 36,
             decoration: BoxDecoration(
               color: iconColor.withOpacity(0.12),
               borderRadius: BorderRadius.circular(10),
@@ -378,12 +379,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
           const SizedBox(width: 14),
           Text(label,
-              style: const TextStyle(color: Colors.white, fontSize: 14)),
+              style: TextStyle(color: AppTheme.text(context), fontSize: 14)),
           const Spacer(),
           Text(
             value,
             style: TextStyle(
-              color: valueColor ?? Colors.white.withOpacity(0.45),
+              color: valueColor ?? AppTheme.textSecondary(context),
               fontSize: 13,
               fontWeight: FontWeight.w500,
             ),

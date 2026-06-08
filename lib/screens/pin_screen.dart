@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../services/database_service.dart';
+import '../utils/app_theme.dart';
 import '../widgets/empty_state.dart';
 import '../widgets/shimmer.dart';
 
@@ -90,16 +91,15 @@ class _PinScreenState extends State<PinScreen> {
       isScrollControlled: true,
       builder: (_) => Container(
         padding: const EdgeInsets.all(32),
-        decoration: const BoxDecoration(
-          color: Color(0xFF1A1A2E),
-          borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
+        decoration: BoxDecoration(
+          color: AppTheme.card(context),
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Container(
-              width: 80,
-              height: 80,
+              width: 80, height: 80,
               decoration: BoxDecoration(
                 color: const Color(0xFF10B981).withOpacity(0.2),
                 shape: BoxShape.circle,
@@ -108,13 +108,14 @@ class _PinScreenState extends State<PinScreen> {
                   color: Color(0xFF10B981), size: 40),
             ),
             const SizedBox(height: 16),
-            const Text('Kimlik Doğrulandı',
-                style: TextStyle(color: Colors.white70, fontSize: 14)),
+            Text('Kimlik Doğrulandı',
+                style: TextStyle(
+                    color: AppTheme.textSecondary(context), fontSize: 14)),
             const SizedBox(height: 8),
             Text(
               _selectedUser!['name'] as String,
-              style: const TextStyle(
-                  color: Colors.white,
+              style: TextStyle(
+                  color: AppTheme.text(context),
                   fontSize: 28,
                   fontWeight: FontWeight.bold),
             ),
@@ -124,8 +125,8 @@ class _PinScreenState extends State<PinScreen> {
             const SizedBox(height: 4),
             Text(
               '₺${widget.amount.toStringAsFixed(2)}',
-              style: const TextStyle(
-                  color: Colors.white,
+              style: TextStyle(
+                  color: AppTheme.text(context),
                   fontSize: 22,
                   fontWeight: FontWeight.bold),
             ),
@@ -153,12 +154,12 @@ class _PinScreenState extends State<PinScreen> {
             const SizedBox(height: 16),
             TextButton(
               onPressed: () {
-                Navigator.pop(context); // sheet
-                Navigator.pop(context); // pin screen
-                Navigator.pop(context); // scan screen
+                Navigator.pop(context);
+                Navigator.pop(context);
+                Navigator.pop(context);
               },
-              child: const Text('Kapat',
-                  style: TextStyle(color: Colors.white54)),
+              child: Text('Kapat',
+                  style: TextStyle(color: AppTheme.textSecondary(context))),
             ),
             const SizedBox(height: 16),
           ],
@@ -171,14 +172,11 @@ class _PinScreenState extends State<PinScreen> {
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
-        backgroundColor: const Color(0xFF1A1A2E),
-        shape:
-            RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title:
-            const Text('PIN Unutuldu', style: TextStyle(color: Colors.white)),
-        content: const Text(
+        title: Text('PIN Unutuldu',
+            style: TextStyle(color: AppTheme.text(context))),
+        content: Text(
           'PIN\'inizi unuttuysanız lütfen yönetici ile iletişime geçin.',
-          style: TextStyle(color: Colors.white70),
+          style: TextStyle(color: AppTheme.textSecondary(context)),
         ),
         actions: [
           TextButton(
@@ -194,34 +192,29 @@ class _PinScreenState extends State<PinScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF0A0A1A),
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_rounded, color: Colors.white),
+          icon: Icon(Icons.arrow_back_ios_rounded,
+              color: Theme.of(context).appBarTheme.iconTheme?.color),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text('PIN ile Doğrula',
-            style:
-                TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+        title: const Text('PIN ile Doğrula'),
       ),
       body: SafeArea(
-        child:
-            _selectedUser == null ? _buildUserSelect() : _buildPinEntry(),
+        child: _selectedUser == null ? _buildUserSelect(context) : _buildPinEntry(context),
       ),
     );
   }
 
-  Widget _buildUserSelect() {
+  Widget _buildUserSelect(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Padding(
-          padding: EdgeInsets.fromLTRB(24, 24, 24, 8),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(24, 24, 24, 8),
           child: Text('Hesabınızı seçin',
               style: TextStyle(
-                  color: Colors.white,
+                  color: AppTheme.text(context),
                   fontSize: 22,
                   fontWeight: FontWeight.bold)),
         ),
@@ -254,42 +247,39 @@ class _PinScreenState extends State<PinScreen> {
                 final hand = (user['hand'] as String?) ?? 'sağ';
                 final hasPin = (user['pin_hash'] as String?) != null;
                 return Card(
-                  color: const Color(0xFF1A1A2E),
+                  color: AppTheme.card(context),
                   margin: const EdgeInsets.only(bottom: 10),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(16),
-                    side:
-                        BorderSide(color: Colors.white.withOpacity(0.08)),
+                    side: BorderSide(color: AppTheme.border(context)),
                   ),
                   child: ListTile(
                     contentPadding: const EdgeInsets.symmetric(
                         horizontal: 20, vertical: 8),
                     leading: Container(
-                      width: 44,
-                      height: 44,
+                      width: 44, height: 44,
                       decoration: BoxDecoration(
-                        color:
-                            const Color(0xFF6C63FF).withOpacity(0.15),
+                        color: const Color(0xFF6C63FF).withOpacity(0.15),
                         shape: BoxShape.circle,
                       ),
                       child: const Icon(Icons.person_rounded,
                           color: Color(0xFF6C63FF), size: 22),
                     ),
                     title: Text(user['name'] as String,
-                        style: const TextStyle(
-                            color: Colors.white,
+                        style: TextStyle(
+                            color: AppTheme.text(context),
                             fontWeight: FontWeight.w600)),
                     subtitle: Text(
                       '${hand == 'sağ' ? 'Sağ' : 'Sol'} el${hasPin ? '' : ' • PIN tanımlı değil'}',
                       style: TextStyle(
                           color: hasPin
-                              ? Colors.white.withOpacity(0.4)
-                              : Colors.orange.withOpacity(0.7),
+                              ? AppTheme.textMuted(context)
+                              : Colors.orange.withOpacity(0.8),
                           fontSize: 12),
                     ),
                     trailing: hasPin
-                        ? const Icon(Icons.chevron_right_rounded,
-                            color: Colors.white38)
+                        ? Icon(Icons.chevron_right_rounded,
+                            color: AppTheme.textMuted(context))
                         : const Icon(Icons.lock_open_rounded,
                             color: Colors.orange, size: 18),
                     onTap: hasPin
@@ -304,14 +294,14 @@ class _PinScreenState extends State<PinScreen> {
     );
   }
 
-  Widget _buildPinEntry() {
+  Widget _buildPinEntry(BuildContext context) {
     return Column(
       children: [
         const SizedBox(height: 32),
         Text(
           _selectedUser!['name'] as String,
-          style: const TextStyle(
-              color: Colors.white,
+          style: TextStyle(
+              color: AppTheme.text(context),
               fontSize: 22,
               fontWeight: FontWeight.bold),
         ),
@@ -324,10 +314,11 @@ class _PinScreenState extends State<PinScreen> {
               fontWeight: FontWeight.w600),
         ),
         const SizedBox(height: 40),
-        const Text('6 haneli PIN girin',
-            style: TextStyle(color: Colors.white54, fontSize: 14)),
+        Text('6 haneli PIN girin',
+            style: TextStyle(
+                color: AppTheme.textSecondary(context), fontSize: 14)),
         const SizedBox(height: 24),
-        _buildDots(),
+        _buildDots(context),
         AnimatedOpacity(
           opacity: _hasError ? 1.0 : 0.0,
           duration: const Duration(milliseconds: 200),
@@ -340,16 +331,16 @@ class _PinScreenState extends State<PinScreen> {
         if (_isVerifying)
           const Padding(
             padding: EdgeInsets.only(top: 16),
-            child:
-                CircularProgressIndicator(color: Color(0xFF6C63FF)),
+            child: CircularProgressIndicator(color: Color(0xFF6C63FF)),
           ),
         const Spacer(),
-        _buildNumpad(),
+        _buildNumpad(context),
         const SizedBox(height: 8),
         TextButton(
           onPressed: _showForgotDialog,
-          child: const Text('PIN\'i unuttum',
-              style: TextStyle(color: Colors.white38, fontSize: 13)),
+          child: Text('PIN\'i unuttum',
+              style: TextStyle(
+                  color: AppTheme.textMuted(context), fontSize: 13)),
         ),
         const SizedBox(height: 4),
         TextButton.icon(
@@ -358,17 +349,18 @@ class _PinScreenState extends State<PinScreen> {
             _pin = '';
             _hasError = false;
           }),
-          icon: const Icon(Icons.swap_horiz_rounded,
-              color: Colors.white38, size: 16),
-          label: const Text('Hesabı değiştir',
-              style: TextStyle(color: Colors.white38, fontSize: 13)),
+          icon: Icon(Icons.swap_horiz_rounded,
+              color: AppTheme.textMuted(context), size: 16),
+          label: Text('Hesabı değiştir',
+              style: TextStyle(
+                  color: AppTheme.textMuted(context), fontSize: 13)),
         ),
         const SizedBox(height: 24),
       ],
     );
   }
 
-  Widget _buildDots() {
+  Widget _buildDots(BuildContext context) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: List.generate(6, (i) {
@@ -385,10 +377,8 @@ class _PinScreenState extends State<PinScreen> {
                 : Colors.transparent,
             border: Border.all(
               color: filled
-                  ? (_hasError
-                      ? Colors.red
-                      : const Color(0xFF6C63FF))
-                  : Colors.white.withOpacity(0.3),
+                  ? (_hasError ? Colors.red : const Color(0xFF6C63FF))
+                  : AppTheme.border(context),
               width: 2,
             ),
           ),
@@ -397,7 +387,7 @@ class _PinScreenState extends State<PinScreen> {
     );
   }
 
-  Widget _buildNumpad() {
+  Widget _buildNumpad(BuildContext context) {
     const rows = [
       ['1', '2', '3'],
       ['4', '5', '6'],
@@ -455,12 +445,12 @@ class _PinKey extends StatelessWidget {
           decoration: BoxDecoration(
             color: isBackspace
                 ? Colors.red.withAlpha(20)
-                : const Color(0xFF1A1A2E),
+                : AppTheme.card(context),
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
               color: isBackspace
                   ? Colors.red.withAlpha(40)
-                  : Colors.white.withAlpha(13),
+                  : AppTheme.border(context),
             ),
           ),
           child: Center(
@@ -468,8 +458,8 @@ class _PinKey extends StatelessWidget {
                 ? Icon(Icons.backspace_outlined,
                     color: Colors.red.withAlpha(200), size: 22)
                 : Text(label,
-                    style: const TextStyle(
-                        color: Colors.white,
+                    style: TextStyle(
+                        color: AppTheme.text(context),
                         fontSize: 24,
                         fontWeight: FontWeight.w500)),
           ),

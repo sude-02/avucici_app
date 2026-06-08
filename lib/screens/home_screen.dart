@@ -7,6 +7,7 @@ import 'users_screen.dart';
 import 'profile_screen.dart';
 import '../services/database_service.dart';
 import '../utils/app_routes.dart';
+import '../utils/app_theme.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -32,7 +33,6 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF0A0A1A),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 24.0),
@@ -46,7 +46,7 @@ class _HomeScreenState extends State<HomeScreen> {
               const SizedBox(height: 16),
               _buildSecondaryButtons(context),
               const SizedBox(height: 24),
-              _buildFooter(),
+              _buildFooter(context),
               const SizedBox(height: 20),
             ],
           ),
@@ -76,8 +76,8 @@ class _HomeScreenState extends State<HomeScreen> {
             const Spacer(),
             if (_userCount > 0)
               IconButton(
-                icon: const Icon(Icons.manage_accounts_rounded,
-                    color: Colors.white54),
+                icon: Icon(Icons.manage_accounts_rounded,
+                    color: AppTheme.textMuted(context)),
                 tooltip: 'Profil Yönet',
                 onPressed: () async {
                   final users = await DatabaseService().getAllUsers();
@@ -96,7 +96,8 @@ class _HomeScreenState extends State<HomeScreen> {
                 },
               ),
             IconButton(
-              icon: const Icon(Icons.settings_rounded, color: Colors.white38),
+              icon: Icon(Icons.settings_rounded,
+                  color: AppTheme.textMuted(context)),
               onPressed: () => Navigator.push(
                 context,
                 AppRoutes.push(const SettingsScreen()),
@@ -105,10 +106,10 @@ class _HomeScreenState extends State<HomeScreen> {
           ],
         ),
         const SizedBox(height: 24),
-        const Text(
+        Text(
           'PalmPay',
           style: TextStyle(
-            color: Colors.white,
+            color: AppTheme.text(context),
             fontSize: 36,
             fontWeight: FontWeight.bold,
             letterSpacing: -1,
@@ -118,7 +119,7 @@ class _HomeScreenState extends State<HomeScreen> {
         Text(
           'Avuç içi biyometrik ödeme sistemi',
           style: TextStyle(
-            color: Colors.white.withOpacity(0.5),
+            color: AppTheme.textSecondary(context),
             fontSize: 16,
           ),
         ),
@@ -144,7 +145,7 @@ class _HomeScreenState extends State<HomeScreen> {
           borderRadius: BorderRadius.circular(28),
           boxShadow: [
             BoxShadow(
-              color: const Color(0xFF6C63FF).withOpacity(0.4),
+              color: const Color(0xFF6C63FF).withOpacity(0.35),
               blurRadius: 24,
               offset: const Offset(0, 8),
             ),
@@ -166,10 +167,7 @@ class _HomeScreenState extends State<HomeScreen> {
             SizedBox(height: 4),
             Text(
               'Avucunu okut',
-              style: TextStyle(
-                color: Colors.white70,
-                fontSize: 14,
-              ),
+              style: TextStyle(color: Colors.white70, fontSize: 14),
             ),
           ],
         ),
@@ -232,9 +230,9 @@ class _HomeScreenState extends State<HomeScreen> {
       child: Container(
         height: 90,
         decoration: BoxDecoration(
-          color: const Color(0xFF1A1A2E),
+          color: AppTheme.card(context),
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: color.withOpacity(0.3)),
+          border: Border.all(color: color.withOpacity(0.25)),
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -243,8 +241,8 @@ class _HomeScreenState extends State<HomeScreen> {
             const SizedBox(height: 6),
             Text(
               label,
-              style: const TextStyle(
-                color: Colors.white,
+              style: TextStyle(
+                color: AppTheme.text(context),
                 fontSize: 13,
                 fontWeight: FontWeight.bold,
               ),
@@ -254,7 +252,7 @@ class _HomeScreenState extends State<HomeScreen> {
             Text(
               subtitle,
               style: TextStyle(
-                color: Colors.white.withOpacity(0.4),
+                color: AppTheme.textMuted(context),
                 fontSize: 11,
               ),
               overflow: TextOverflow.ellipsis,
@@ -266,12 +264,12 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildFooter() {
+  Widget _buildFooter(BuildContext context) {
     return Center(
       child: Text(
         'Güvenli • Hızlı • Temassız',
         style: TextStyle(
-          color: Colors.white.withOpacity(0.25),
+          color: AppTheme.textMuted(context),
           fontSize: 13,
           letterSpacing: 1.5,
         ),

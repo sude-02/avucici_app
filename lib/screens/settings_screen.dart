@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:provider/provider.dart';
+import '../providers/theme_provider.dart';
 import '../services/app_settings.dart';
 import '../services/database_service.dart';
+import '../utils/app_theme.dart';
 import '../widgets/app_feedback.dart';
 import 'privacy_policy_screen.dart';
 import 'terms_screen.dart';
@@ -33,29 +36,22 @@ class _SettingsScreenState extends State<SettingsScreen> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (_) => AlertDialog(
-        backgroundColor: const Color(0xFF1A1A2E),
-        shape:
-            RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         title: const Row(
           children: [
-            Icon(Icons.warning_amber_rounded,
-                color: Colors.red, size: 24),
+            Icon(Icons.warning_amber_rounded, color: Colors.red, size: 24),
             SizedBox(width: 10),
             Text('Verileri Sil',
-                style: TextStyle(
-                    color: Colors.white, fontWeight: FontWeight.bold)),
+                style: TextStyle(fontWeight: FontWeight.bold)),
           ],
         ),
-        content: Text(
+        content: const Text(
           'Tüm kayıtlı kullanıcılar ve biyometrik veriler kalıcı olarak silinecek. '
           'Bu işlem geri alınamaz.',
-          style: TextStyle(color: Colors.white.withAlpha(179), height: 1.5),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('İptal',
-                style: TextStyle(color: Colors.white54)),
+            child: const Text('İptal'),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
@@ -87,42 +83,41 @@ class _SettingsScreenState extends State<SettingsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF0A0A1A),
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_rounded,
-              color: Colors.white),
+          icon: Icon(Icons.arrow_back_ios_rounded,
+              color: Theme.of(context).appBarTheme.iconTheme?.color),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text(
-          'Ayarlar',
-          style: TextStyle(
-              color: Colors.white, fontWeight: FontWeight.bold),
-        ),
+        title: const Text('Ayarlar'),
       ),
       body: ListView(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
         children: [
           _buildSection(
+            context,
+            label: 'GÖRÜNÜM',
+            children: [_buildThemeTile()],
+          ),
+          const SizedBox(height: 8),
+          _buildSection(
+            context,
             label: 'TANIMLAMA',
-            children: [
-              _buildThresholdTile(),
-            ],
+            children: [_buildThresholdTile(context)],
           ),
           const SizedBox(height: 8),
           _buildSection(
+            context,
             label: 'İZİNLER',
-            children: [
-              _buildPermissionTile(),
-            ],
+            children: [_buildPermissionTile(context)],
           ),
           const SizedBox(height: 8),
           _buildSection(
+            context,
             label: 'YASAL',
             children: [
               _buildNavTile(
+                context,
                 icon: Icons.privacy_tip_rounded,
                 iconColor: const Color(0xFF3B82F6),
                 title: 'Gizlilik Politikası',
@@ -132,8 +127,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       builder: (_) => const PrivacyPolicyScreen()),
                 ),
               ),
-              _buildDivider(),
+              _buildDivider(context),
               _buildNavTile(
+                context,
                 icon: Icons.description_rounded,
                 iconColor: const Color(0xFF7C3AED),
                 title: 'Kullanım Koşulları',
@@ -146,24 +142,24 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
           const SizedBox(height: 8),
           _buildSection(
+            context,
             label: 'VERİ YÖNETİMİ',
-            children: [
-              _buildDeleteTile(),
-            ],
+            children: [_buildDeleteTile(context)],
           ),
           const SizedBox(height: 8),
           _buildSection(
+            context,
             label: 'UYGULAMA',
             children: [
-              _buildInfoTile(
+              _buildInfoTile(context,
                   icon: Icons.info_outline_rounded,
-                  iconColor: Colors.white38,
+                  iconColor: AppTheme.textMuted(context),
                   title: 'Versiyon',
                   value: '1.0.0'),
-              _buildDivider(),
-              _buildInfoTile(
+              _buildDivider(context),
+              _buildInfoTile(context,
                   icon: Icons.back_hand_rounded,
-                  iconColor: Colors.white38,
+                  iconColor: AppTheme.textMuted(context),
                   title: 'Uygulama',
                   value: 'PalmPay'),
             ],
@@ -174,7 +170,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  Widget _buildSection(
+  Widget _buildSection(BuildContext context,
       {required String label, required List<Widget> children}) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -184,7 +180,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           child: Text(
             label,
             style: TextStyle(
-              color: Colors.white.withAlpha(77),
+              color: AppTheme.textMuted(context),
               fontSize: 11,
               fontWeight: FontWeight.w700,
               letterSpacing: 1.2,
@@ -193,9 +189,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
         ),
         Container(
           decoration: BoxDecoration(
-            color: const Color(0xFF1A1A2E),
+            color: AppTheme.card(context),
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: Colors.white.withAlpha(13)),
+            border: Border.all(color: AppTheme.border(context)),
           ),
           child: Column(children: children),
         ),
@@ -203,7 +199,58 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  Widget _buildThresholdTile() {
+  Widget _buildThemeTile() {
+    return Consumer<ThemeProvider>(
+      builder: (_, themeProvider, __) {
+        final isDark = themeProvider.isDark;
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          child: Row(
+            children: [
+              Container(
+                width: 38,
+                height: 38,
+                decoration: BoxDecoration(
+                  color: const Color(0xFF7C3AED).withAlpha(38),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Icon(
+                  isDark ? Icons.dark_mode_rounded : Icons.light_mode_rounded,
+                  color: const Color(0xFF7C3AED),
+                  size: 20,
+                ),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Koyu Tema',
+                        style: TextStyle(
+                            color: AppTheme.text(context),
+                            fontSize: 15,
+                            fontWeight: FontWeight.w500)),
+                    Text(
+                      isDark ? 'Koyu mod aktif' : 'Açık mod aktif',
+                      style: TextStyle(
+                          color: AppTheme.textMuted(context), fontSize: 11),
+                    ),
+                  ],
+                ),
+              ),
+              Switch(
+                value: isDark,
+                onChanged: (_) => themeProvider.toggleTheme(),
+                activeColor: const Color(0xFF7C3AED),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildThresholdTile(BuildContext context) {
     final pct = (_threshold * 100).round();
     String sensitivity;
     Color sensitivityColor;
@@ -238,23 +285,23 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     color: Color(0xFF6C63FF), size: 20),
               ),
               const SizedBox(width: 14),
-              const Expanded(
+              Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text('Avuç Tanıma Eşiği',
                         style: TextStyle(
-                            color: Colors.white,
+                            color: AppTheme.text(context),
                             fontSize: 15,
                             fontWeight: FontWeight.w500)),
                     Text('Eşleşme hassasiyeti',
-                        style: TextStyle(color: Colors.white38, fontSize: 11)),
+                        style: TextStyle(
+                            color: AppTheme.textMuted(context), fontSize: 11)),
                   ],
                 ),
               ),
               Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(
                   color: sensitivityColor.withAlpha(38),
                   borderRadius: BorderRadius.circular(8),
@@ -273,7 +320,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           SliderTheme(
             data: SliderTheme.of(context).copyWith(
               activeTrackColor: const Color(0xFF6C63FF),
-              inactiveTrackColor: Colors.white.withAlpha(26),
+              inactiveTrackColor: AppTheme.border(context),
               thumbColor: const Color(0xFF6C63FF),
               overlayColor: const Color(0xFF6C63FF).withAlpha(38),
               trackHeight: 4,
@@ -292,10 +339,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
             children: [
               Text('Geniş (0.40)',
                   style: TextStyle(
-                      color: Colors.white.withAlpha(77), fontSize: 10)),
+                      color: AppTheme.textMuted(context), fontSize: 10)),
               Text('Hassas (0.95)',
                   style: TextStyle(
-                      color: Colors.white.withAlpha(77), fontSize: 10)),
+                      color: AppTheme.textMuted(context), fontSize: 10)),
             ],
           ),
         ],
@@ -303,26 +350,21 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  Widget _buildPermissionTile() {
+  Widget _buildPermissionTile(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       child: Row(
         children: [
           Container(
-            width: 38,
-            height: 38,
+            width: 38, height: 38,
             decoration: BoxDecoration(
-              color: (_cameraGranted
-                      ? const Color(0xFF059669)
-                      : Colors.red)
+              color: (_cameraGranted ? const Color(0xFF059669) : Colors.red)
                   .withAlpha(38),
               borderRadius: BorderRadius.circular(10),
             ),
             child: Icon(
               Icons.camera_alt_rounded,
-              color: _cameraGranted
-                  ? const Color(0xFF059669)
-                  : Colors.red,
+              color: _cameraGranted ? const Color(0xFF059669) : Colors.red,
               size: 20,
             ),
           ),
@@ -331,9 +373,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text('Kamera',
+                Text('Kamera',
                     style: TextStyle(
-                        color: Colors.white,
+                        color: AppTheme.text(context),
                         fontSize: 15,
                         fontWeight: FontWeight.w500)),
                 Text(
@@ -363,7 +405,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  Widget _buildNavTile({
+  Widget _buildNavTile(BuildContext context, {
     required IconData icon,
     required Color iconColor,
     required String title,
@@ -377,8 +419,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         child: Row(
           children: [
             Container(
-              width: 38,
-              height: 38,
+              width: 38, height: 38,
               decoration: BoxDecoration(
                 color: iconColor.withAlpha(38),
                 borderRadius: BorderRadius.circular(10),
@@ -389,21 +430,21 @@ class _SettingsScreenState extends State<SettingsScreen> {
             Expanded(
               child: Text(
                 title,
-                style: const TextStyle(
-                    color: Colors.white,
+                style: TextStyle(
+                    color: AppTheme.text(context),
                     fontSize: 15,
                     fontWeight: FontWeight.w500),
               ),
             ),
             Icon(Icons.chevron_right_rounded,
-                color: Colors.white.withAlpha(77)),
+                color: AppTheme.textMuted(context)),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildInfoTile({
+  Widget _buildInfoTile(BuildContext context, {
     required IconData icon,
     required Color iconColor,
     required String title,
@@ -414,33 +455,30 @@ class _SettingsScreenState extends State<SettingsScreen> {
       child: Row(
         children: [
           Container(
-            width: 38,
-            height: 38,
+            width: 38, height: 38,
             decoration: BoxDecoration(
-              color: iconColor.withAlpha(26),
+              color: AppTheme.border(context),
               borderRadius: BorderRadius.circular(10),
             ),
             child: Icon(icon, color: iconColor, size: 20),
           ),
           const SizedBox(width: 14),
           Expanded(
-            child: Text(
-              title,
-              style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 15,
-                  fontWeight: FontWeight.w500),
-            ),
+            child: Text(title,
+                style: TextStyle(
+                    color: AppTheme.text(context),
+                    fontSize: 15,
+                    fontWeight: FontWeight.w500)),
           ),
           Text(value,
               style: TextStyle(
-                  color: Colors.white.withAlpha(102), fontSize: 14)),
+                  color: AppTheme.textSecondary(context), fontSize: 14)),
         ],
       ),
     );
   }
 
-  Widget _buildDeleteTile() {
+  Widget _buildDeleteTile(BuildContext context) {
     return InkWell(
       onTap: _isDeleting ? null : _deleteAllData,
       borderRadius: BorderRadius.circular(16),
@@ -449,8 +487,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         child: Row(
           children: [
             Container(
-              width: 38,
-              height: 38,
+              width: 38, height: 38,
               decoration: BoxDecoration(
                 color: Colors.red.withAlpha(38),
                 borderRadius: BorderRadius.circular(10),
@@ -475,8 +512,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           fontSize: 15,
                           fontWeight: FontWeight.w600)),
                   Text('Tüm biyometrik kayıtları siler',
-                      style:
-                          TextStyle(color: Colors.red, fontSize: 11)),
+                      style: TextStyle(color: Colors.red, fontSize: 11)),
                 ],
               ),
             ),
@@ -486,11 +522,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  Widget _buildDivider() {
-    return Divider(
-      height: 1,
-      indent: 68,
-      color: Colors.white.withAlpha(13),
-    );
+  Widget _buildDivider(BuildContext context) {
+    return Divider(height: 1, indent: 68, color: AppTheme.border(context));
   }
 }

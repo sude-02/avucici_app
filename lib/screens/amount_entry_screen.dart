@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'scan_screen.dart';
 import '../utils/app_routes.dart';
+import '../utils/app_theme.dart';
 
 class AmountEntryScreen extends StatefulWidget {
   const AmountEntryScreen({super.key});
@@ -18,7 +19,6 @@ class _AmountEntryScreenState extends State<AmountEntryScreen> {
 
   String get _displayText {
     if (_input.isEmpty) return '0';
-    // Show trailing dot if user just typed it
     final base = _parsed?.toStringAsFixed(
             _input.contains('.') ? (_input.split('.').last.length) : 0) ??
         _input;
@@ -37,11 +37,10 @@ class _AmountEntryScreenState extends State<AmountEntryScreen> {
         _input = _input.isEmpty ? '0.' : '$_input.';
         return;
       }
-      // Digit
       final dotIndex = _input.indexOf('.');
-      if (dotIndex != -1 && (_input.length - dotIndex) > 2) return; // max 2 decimals
+      if (dotIndex != -1 && (_input.length - dotIndex) > 2) return;
       if (_input == '0') {
-        _input = key; // replace leading zero
+        _input = key;
       } else {
         _input += key;
       }
@@ -60,27 +59,22 @@ class _AmountEntryScreenState extends State<AmountEntryScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF0A0A1A),
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_rounded, color: Colors.white),
+          icon: Icon(Icons.arrow_back_ios_rounded,
+              color: Theme.of(context).appBarTheme.iconTheme?.color),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text(
-          'Ödeme Tutarı',
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-        ),
+        title: const Text('Ödeme Tutarı'),
       ),
       body: SafeArea(
         child: Column(
           children: [
-            _buildDisplay(),
+            _buildDisplay(context),
             const Spacer(),
-            _buildNumpad(),
+            _buildNumpad(context),
             const SizedBox(height: 16),
-            _buildProceedButton(),
+            _buildProceedButton(context),
             const SizedBox(height: 32),
           ],
         ),
@@ -88,7 +82,7 @@ class _AmountEntryScreenState extends State<AmountEntryScreen> {
     );
   }
 
-  Widget _buildDisplay() {
+  Widget _buildDisplay(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(32, 40, 32, 16),
       child: Column(
@@ -96,7 +90,7 @@ class _AmountEntryScreenState extends State<AmountEntryScreen> {
           Text(
             'Ne kadar ödemek istiyorsunuz?',
             style: TextStyle(
-              color: Colors.white.withAlpha(128),
+              color: AppTheme.textSecondary(context),
               fontSize: 15,
             ),
           ),
@@ -109,7 +103,9 @@ class _AmountEntryScreenState extends State<AmountEntryScreen> {
               '₺$_displayText',
               key: ValueKey(_displayText),
               style: TextStyle(
-                color: _isValid ? Colors.white : Colors.white38,
+                color: _isValid
+                    ? AppTheme.text(context)
+                    : AppTheme.textMuted(context),
                 fontSize: _displayText.length > 8 ? 44 : 56,
                 fontWeight: FontWeight.bold,
                 letterSpacing: -1,
@@ -130,7 +126,7 @@ class _AmountEntryScreenState extends State<AmountEntryScreen> {
     );
   }
 
-  Widget _buildNumpad() {
+  Widget _buildNumpad(BuildContext context) {
     const rows = [
       ['1', '2', '3'],
       ['4', '5', '6'],
@@ -148,10 +144,7 @@ class _AmountEntryScreenState extends State<AmountEntryScreen> {
                 return Expanded(
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 6),
-                    child: _NumpadKey(
-                      label: key,
-                      onTap: () => _tap(key),
-                    ),
+                    child: _NumpadKey(label: key, onTap: () => _tap(key)),
                   ),
                 );
               }).toList(),
@@ -162,7 +155,7 @@ class _AmountEntryScreenState extends State<AmountEntryScreen> {
     );
   }
 
-  Widget _buildProceedButton() {
+  Widget _buildProceedButton(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24),
       child: SizedBox(
@@ -172,8 +165,10 @@ class _AmountEntryScreenState extends State<AmountEntryScreen> {
           style: ElevatedButton.styleFrom(
             backgroundColor: _isValid
                 ? const Color(0xFF7C3AED)
-                : Colors.white.withAlpha(20),
-            foregroundColor: _isValid ? Colors.white : Colors.white38,
+                : AppTheme.border(context),
+            foregroundColor: _isValid
+                ? Colors.white
+                : AppTheme.textMuted(context),
             shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(18)),
             elevation: 0,
@@ -183,9 +178,7 @@ class _AmountEntryScreenState extends State<AmountEntryScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Icon(
-                _isValid
-                    ? Icons.sensors_rounded
-                    : Icons.lock_rounded,
+                _isValid ? Icons.sensors_rounded : Icons.lock_rounded,
                 size: 22,
               ),
               const SizedBox(width: 10),
@@ -227,12 +220,12 @@ class _NumpadKey extends StatelessWidget {
           decoration: BoxDecoration(
             color: isBackspace
                 ? Colors.red.withAlpha(20)
-                : const Color(0xFF1A1A2E),
+                : AppTheme.card(context),
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
               color: isBackspace
                   ? Colors.red.withAlpha(51)
-                  : Colors.white.withAlpha(13),
+                  : AppTheme.border(context),
             ),
           ),
           child: Center(
@@ -243,8 +236,8 @@ class _NumpadKey extends StatelessWidget {
                     label,
                     style: TextStyle(
                       color: isDot
-                          ? Colors.white.withAlpha(179)
-                          : Colors.white,
+                          ? AppTheme.textSecondary(context)
+                          : AppTheme.text(context),
                       fontSize: isDot ? 28 : 24,
                       fontWeight: FontWeight.w500,
                     ),

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
 import '../services/camera_service.dart';
 import '../services/database_service.dart';
+import '../utils/app_theme.dart';
 import '../widgets/empty_state.dart';
 import '../widgets/shimmer.dart';
 import '../utils/app_routes.dart';
@@ -40,17 +41,16 @@ class _UsersScreenState extends State<UsersScreen> {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (_) => AlertDialog(
-        backgroundColor: const Color(0xFF1A1A2E),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: const Text('Kullanıcıyı Sil',
-            style: TextStyle(color: Colors.white)),
+        title: Text('Kullanıcıyı Sil',
+            style: TextStyle(color: AppTheme.text(context))),
         content: Text('$name silinecek. Emin misin?',
-            style: TextStyle(color: Colors.white.withOpacity(0.7))),
+            style: TextStyle(color: AppTheme.textSecondary(context))),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('İptal',
-                style: TextStyle(color: Colors.white54)),
+            child: Text('İptal',
+                style: TextStyle(color: AppTheme.textMuted(context))),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
@@ -70,8 +70,7 @@ class _UsersScreenState extends State<UsersScreen> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) =>
-            UserDetailScreen(user: user, dbService: _dbService),
+        builder: (_) => UserDetailScreen(user: user, dbService: _dbService),
       ),
     ).then((_) => _loadUsers());
   }
@@ -86,18 +85,13 @@ class _UsersScreenState extends State<UsersScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF0A0A1A),
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_rounded,
-              color: Colors.white),
+          icon: Icon(Icons.arrow_back_ios_rounded,
+              color: Theme.of(context).appBarTheme.iconTheme?.color),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text('Kayıtlı Kullanıcılar',
-            style: TextStyle(
-                color: Colors.white, fontWeight: FontWeight.bold)),
+        title: const Text('Kayıtlı Kullanıcılar'),
       ),
       body: _isLoading
           ? const ShimmerUserListView()
@@ -130,15 +124,16 @@ class _UsersScreenState extends State<UsersScreen> {
         return Container(
           margin: const EdgeInsets.only(bottom: 12),
           decoration: BoxDecoration(
-            color: const Color(0xFF1A1A2E),
+            color: AppTheme.card(context),
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: Colors.white.withOpacity(0.05)),
+            border: Border.all(color: AppTheme.border(context)),
           ),
           child: InkWell(
             onTap: () => _openUserDetail(user),
             borderRadius: BorderRadius.circular(16),
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               child: Row(
                 children: [
                   Container(
@@ -151,7 +146,7 @@ class _UsersScreenState extends State<UsersScreen> {
                     ),
                     child: Center(
                       child: Text(
-                        user['name'][0].toUpperCase(),
+                        (user['name'] as String)[0].toUpperCase(),
                         style: const TextStyle(
                             color: Colors.white,
                             fontSize: 20,
@@ -165,9 +160,9 @@ class _UsersScreenState extends State<UsersScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          user['name'],
-                          style: const TextStyle(
-                              color: Colors.white,
+                          user['name'] as String,
+                          style: TextStyle(
+                              color: AppTheme.text(context),
                               fontSize: 15,
                               fontWeight: FontWeight.w600),
                           overflow: TextOverflow.ellipsis,
@@ -177,13 +172,15 @@ class _UsersScreenState extends State<UsersScreen> {
                           children: [
                             Icon(Icons.back_hand_rounded,
                                 size: 11,
-                                color: const Color(0xFF6C63FF).withOpacity(0.7)),
+                                color:
+                                    const Color(0xFF6C63FF).withOpacity(0.7)),
                             const SizedBox(width: 4),
                             Flexible(
                               child: Text(
                                 '${hand == 'sağ' ? 'Sağ' : 'Sol'} el • Detaylar için dokun',
                                 style: TextStyle(
-                                    color: const Color(0xFF6C63FF).withOpacity(0.7),
+                                    color: const Color(0xFF6C63FF)
+                                        .withOpacity(0.7),
                                     fontSize: 12),
                                 overflow: TextOverflow.ellipsis,
                               ),
@@ -200,15 +197,18 @@ class _UsersScreenState extends State<UsersScreen> {
                     onPressed: () => _openUserProfile(user),
                     visualDensity: VisualDensity.compact,
                     padding: EdgeInsets.zero,
-                    constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
+                    constraints:
+                        const BoxConstraints(minWidth: 36, minHeight: 36),
                   ),
                   IconButton(
                     icon: const Icon(Icons.delete_outline_rounded,
                         color: Colors.red, size: 19),
-                    onPressed: () => _deleteUser(user['id'], user['name']),
+                    onPressed: () =>
+                        _deleteUser(user['id'] as int, user['name'] as String),
                     visualDensity: VisualDensity.compact,
                     padding: EdgeInsets.zero,
-                    constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
+                    constraints:
+                        const BoxConstraints(minWidth: 36, minHeight: 36),
                   ),
                 ],
               ),
@@ -252,8 +252,8 @@ class _UserDetailScreenState extends State<UserDetailScreen> {
 
   Future<void> _loadSamples() async {
     setState(() => _isLoading = true);
-    final samples = await widget.dbService
-        .getUserSamples(widget.user['id'] as int);
+    final samples =
+        await widget.dbService.getUserSamples(widget.user['id'] as int);
     setState(() {
       _samples = samples;
       _isLoading = false;
@@ -264,26 +264,21 @@ class _UserDetailScreenState extends State<UserDetailScreen> {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (_) => AlertDialog(
-        backgroundColor: const Color(0xFF1A1A2E),
-        shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20)),
-        title: const Text('Örneği Sil',
-            style: TextStyle(color: Colors.white)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Text('Örneği Sil',
+            style: TextStyle(color: AppTheme.text(context))),
         content: Text('Bu örnek silinecek.',
-            style:
-                TextStyle(color: Colors.white.withOpacity(0.7))),
+            style: TextStyle(color: AppTheme.textSecondary(context))),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('İptal',
-                style: TextStyle(color: Colors.white54)),
+            child: Text('İptal',
+                style: TextStyle(color: AppTheme.textMuted(context))),
           ),
           ElevatedButton(
-            style:
-                ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('Sil',
-                style: TextStyle(color: Colors.white)),
+            child: const Text('Sil', style: TextStyle(color: Colors.white)),
           ),
         ],
       ),
@@ -307,7 +302,6 @@ class _UserDetailScreenState extends State<UserDetailScreen> {
       builder: (_) => _AddSampleSheet(
         cameraService: _cameraService,
         onCapture: (result) async {
-          // Güncellenmiş addSample — flippedEmbedding de geçiliyor
           await widget.dbService.addSample(
             widget.user['id'] as int,
             result.embedding,
@@ -326,25 +320,19 @@ class _UserDetailScreenState extends State<UserDetailScreen> {
   Widget build(BuildContext context) {
     final hand = widget.user['hand'] as String? ?? 'sağ';
     return Scaffold(
-      backgroundColor: const Color(0xFF0A0A1A),
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_rounded,
-              color: Colors.white),
+          icon: Icon(Icons.arrow_back_ios_rounded,
+              color: Theme.of(context).appBarTheme.iconTheme?.color),
           onPressed: () => Navigator.pop(context),
         ),
         title: Row(
           children: [
-            Text(widget.user['name'],
-                style: const TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold)),
+            Text(widget.user['name'] as String),
             const SizedBox(width: 8),
             Container(
-              padding: const EdgeInsets.symmetric(
-                  horizontal: 8, vertical: 3),
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
               decoration: BoxDecoration(
                 color: const Color(0xFF6C63FF).withOpacity(0.2),
                 borderRadius: BorderRadius.circular(8),
@@ -372,8 +360,7 @@ class _UserDetailScreenState extends State<UserDetailScreen> {
       ),
       body: _isLoading
           ? const Center(
-              child: CircularProgressIndicator(
-                  color: Color(0xFF6C63FF)))
+              child: CircularProgressIndicator(color: Color(0xFF6C63FF)))
           : _buildContent(),
     );
   }
@@ -388,8 +375,7 @@ class _UserDetailScreenState extends State<UserDetailScreen> {
             children: [
               Text('${_samples.length} örnek kayıtlı',
                   style: TextStyle(
-                      color: Colors.white.withOpacity(0.5),
-                      fontSize: 14)),
+                      color: AppTheme.textSecondary(context), fontSize: 14)),
               const Spacer(),
               GestureDetector(
                 onTap: _isAddingMore ? null : _addMoreSamples,
@@ -400,8 +386,7 @@ class _UserDetailScreenState extends State<UserDetailScreen> {
                     color: const Color(0xFF6C63FF).withOpacity(0.15),
                     borderRadius: BorderRadius.circular(10),
                     border: Border.all(
-                        color:
-                            const Color(0xFF6C63FF).withOpacity(0.4)),
+                        color: const Color(0xFF6C63FF).withOpacity(0.4)),
                   ),
                   child: const Row(
                     children: [
@@ -410,8 +395,7 @@ class _UserDetailScreenState extends State<UserDetailScreen> {
                       SizedBox(width: 4),
                       Text('Örnek Ekle',
                           style: TextStyle(
-                              color: Color(0xFF6C63FF),
-                              fontSize: 13)),
+                              color: Color(0xFF6C63FF), fontSize: 13)),
                     ],
                   ),
                 ),
@@ -424,7 +408,7 @@ class _UserDetailScreenState extends State<UserDetailScreen> {
               ? Center(
                   child: Text('Örnek bulunamadı',
                       style: TextStyle(
-                          color: Colors.white.withOpacity(0.3))))
+                          color: AppTheme.textMuted(context))))
               : GridView.builder(
                   padding: const EdgeInsets.all(16),
                   gridDelegate:
@@ -434,8 +418,7 @@ class _UserDetailScreenState extends State<UserDetailScreen> {
                     mainAxisSpacing: 10,
                   ),
                   itemCount: _samples.length,
-                  itemBuilder: (_, i) =>
-                      _buildSampleCard(_samples[i]),
+                  itemBuilder: (_, i) => _buildSampleCard(_samples[i]),
                 ),
         ),
       ],
@@ -453,10 +436,9 @@ class _UserDetailScreenState extends State<UserDetailScreen> {
         children: [
           Container(
             decoration: BoxDecoration(
-              color: const Color(0xFF1A1A2E),
+              color: AppTheme.card(context),
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                  color: Colors.white.withOpacity(0.08)),
+              border: Border.all(color: AppTheme.border(context)),
             ),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(12),
@@ -467,12 +449,12 @@ class _UserDetailScreenState extends State<UserDetailScreen> {
                       height: double.infinity)
                   : Center(
                       child: Icon(Icons.back_hand_rounded,
-                          color: Colors.white.withOpacity(0.2),
-                          size: 32)),
+                          color: AppTheme.textMuted(context), size: 32)),
             ),
           ),
           Positioned(
-            top: 4, right: 4,
+            top: 4,
+            right: 4,
             child: GestureDetector(
               onTap: () => _deleteSample(sample['id'] as int),
               child: Container(
@@ -487,17 +469,17 @@ class _UserDetailScreenState extends State<UserDetailScreen> {
             ),
           ),
           Positioned(
-            bottom: 4, left: 4,
+            bottom: 4,
+            left: 4,
             child: Container(
-              padding: const EdgeInsets.symmetric(
-                  horizontal: 6, vertical: 2),
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
               decoration: BoxDecoration(
                 color: Colors.black54,
                 borderRadius: BorderRadius.circular(6),
               ),
               child: Text('${sample['id'] as int}',
-                  style: const TextStyle(
-                      color: Colors.white54, fontSize: 10)),
+                  style: const TextStyle(color: Colors.white54, fontSize: 10)),
             ),
           ),
         ],
@@ -583,10 +565,11 @@ class _AddSampleSheetState extends State<_AddSampleSheet> {
             painter: _MiniSquarePainter(),
           ),
           Positioned(
-            left: 0, right: 0, bottom: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
             child: Container(
-              padding:
-                  const EdgeInsets.fromLTRB(24, 16, 24, 32),
+              padding: const EdgeInsets.fromLTRB(24, 16, 24, 32),
               decoration: const BoxDecoration(
                 gradient: LinearGradient(
                   begin: Alignment.bottomCenter,
@@ -610,45 +593,37 @@ class _AddSampleSheetState extends State<_AddSampleSheet> {
                       Expanded(
                         child: ElevatedButton(
                           style: ElevatedButton.styleFrom(
-                            backgroundColor:
-                                const Color(0xFF6C63FF),
+                            backgroundColor: const Color(0xFF6C63FF),
                             shape: RoundedRectangleBorder(
-                                borderRadius:
-                                    BorderRadius.circular(14)),
-                            padding: const EdgeInsets.symmetric(
-                                vertical: 14),
+                                borderRadius: BorderRadius.circular(14)),
+                            padding: const EdgeInsets.symmetric(vertical: 14),
                           ),
-                          onPressed:
-                              _isCapturing ? null : _capture,
+                          onPressed: _isCapturing ? null : _capture,
                           child: _isCapturing
                               ? const SizedBox(
-                                  width: 20, height: 20,
+                                  width: 20,
+                                  height: 20,
                                   child: CircularProgressIndicator(
-                                      color: Colors.white,
-                                      strokeWidth: 2))
+                                      color: Colors.white, strokeWidth: 2))
                               : const Text('Çek',
                                   style: TextStyle(
                                       color: Colors.white,
                                       fontSize: 16,
-                                      fontWeight:
-                                          FontWeight.bold)),
+                                      fontWeight: FontWeight.bold)),
                         ),
                       ),
                       const SizedBox(width: 12),
                       ElevatedButton(
                         style: ElevatedButton.styleFrom(
-                          backgroundColor:
-                              const Color(0xFF1A1A2E),
+                          backgroundColor: Colors.white12,
                           shape: RoundedRectangleBorder(
-                              borderRadius:
-                                  BorderRadius.circular(14)),
+                              borderRadius: BorderRadius.circular(14)),
                           padding: const EdgeInsets.symmetric(
                               vertical: 14, horizontal: 20),
                         ),
                         onPressed: () => Navigator.pop(context),
                         child: const Text('Bitti',
-                            style: TextStyle(
-                                color: Colors.white70)),
+                            style: TextStyle(color: Colors.white70)),
                       ),
                     ],
                   ),
@@ -657,14 +632,14 @@ class _AddSampleSheetState extends State<_AddSampleSheet> {
             ),
           ),
           Positioned(
-            top: 12, right: 12,
+            top: 12,
+            right: 12,
             child: GestureDetector(
               onTap: () => Navigator.pop(context),
               child: Container(
                 padding: const EdgeInsets.all(6),
-                decoration: BoxDecoration(
-                    color: Colors.black54,
-                    shape: BoxShape.circle),
+                decoration: const BoxDecoration(
+                    color: Colors.black54, shape: BoxShape.circle),
                 child: const Icon(Icons.close_rounded,
                     color: Colors.white, size: 20),
               ),

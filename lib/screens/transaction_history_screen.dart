@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../services/database_service.dart';
+import '../utils/app_theme.dart';
 import '../widgets/empty_state.dart';
 import '../widgets/shimmer.dart';
 
@@ -11,8 +12,7 @@ class TransactionHistoryScreen extends StatefulWidget {
       _TransactionHistoryScreenState();
 }
 
-class _TransactionHistoryScreenState
-    extends State<TransactionHistoryScreen>
+class _TransactionHistoryScreenState extends State<TransactionHistoryScreen>
     with SingleTickerProviderStateMixin {
   final _db = DatabaseService();
   List<Map<String, dynamic>> _all = [];
@@ -43,18 +43,13 @@ class _TransactionHistoryScreenState
     final ok = await showDialog<bool>(
       context: context,
       builder: (_) => AlertDialog(
-        backgroundColor: const Color(0xFF1A1A2E),
-        shape:
-            RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         title: const Text('Geçmişi Temizle',
-            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-        content: Text('Tüm işlem geçmişi silinecek.',
-            style: TextStyle(color: Colors.white.withAlpha(179))),
+            style: TextStyle(fontWeight: FontWeight.bold)),
+        content: const Text('Tüm işlem geçmişi silinecek.'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('İptal',
-                style: TextStyle(color: Colors.white54)),
+            child: const Text('İptal'),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
@@ -79,43 +74,28 @@ class _TransactionHistoryScreenState
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF0A0A1A),
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_rounded, color: Colors.white),
+          icon: Icon(Icons.arrow_back_ios_rounded,
+              color: Theme.of(context).appBarTheme.iconTheme?.color),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text('İşlem Geçmişi',
-            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+        title: const Text('İşlem Geçmişi'),
         actions: [
           if (_all.isNotEmpty)
             IconButton(
               icon: Icon(Icons.delete_sweep_rounded,
-                  color: Colors.white.withAlpha(128)),
+                  color: AppTheme.textSecondary(context)),
               tooltip: 'Geçmişi temizle',
               onPressed: _confirmClear,
             ),
         ],
         bottom: TabBar(
           controller: _tabController,
-          indicatorColor: const Color(0xFF7C3AED),
-          indicatorWeight: 3,
-          labelColor: Colors.white,
-          unselectedLabelColor: Colors.white38,
-          labelStyle: const TextStyle(
-              fontSize: 13, fontWeight: FontWeight.w600),
           tabs: [
             Tab(text: 'Tümü (${_all.length})'),
-            Tab(
-              text:
-                  'Başarılı (${_all.where((t) => t['status'] == 'success').length})',
-            ),
-            Tab(
-              text:
-                  'Başarısız (${_all.where((t) => t['status'] == 'failed').length})',
-            ),
+            Tab(text: 'Başarılı (${_all.where((t) => t['status'] == 'success').length})'),
+            Tab(text: 'Başarısız (${_all.where((t) => t['status'] == 'failed').length})'),
           ],
         ),
       ),
@@ -124,11 +104,11 @@ class _TransactionHistoryScreenState
           : TabBarView(
               controller: _tabController,
               children: [
-                _buildList(_all),
-                _buildList(
+                _buildList(context, _all),
+                _buildList(context,
                     _all.where((t) => t['status'] == 'success').toList(),
                     successOnly: true),
-                _buildList(
+                _buildList(context,
                     _all.where((t) => t['status'] == 'failed').toList(),
                     failedOnly: true),
               ],
@@ -136,7 +116,7 @@ class _TransactionHistoryScreenState
     );
   }
 
-  Widget _buildList(List<Map<String, dynamic>> items,
+  Widget _buildList(BuildContext context, List<Map<String, dynamic>> items,
       {bool successOnly = false, bool failedOnly = false}) {
     if (items.isEmpty) {
       return _buildEmpty(successOnly: successOnly, failedOnly: failedOnly);
@@ -146,24 +126,23 @@ class _TransactionHistoryScreenState
     return RefreshIndicator(
       onRefresh: _load,
       color: const Color(0xFF7C3AED),
-      backgroundColor: const Color(0xFF1A1A2E),
+      backgroundColor: AppTheme.card(context),
       child: ListView.builder(
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
         itemCount: grouped.length,
         itemBuilder: (_, i) {
           final entry = grouped[i];
           if (entry['type'] == 'header') {
-            return _buildDateHeader(entry['label'] as String);
+            return _buildDateHeader(context, entry['label'] as String);
           }
-          return _buildTransactionTile(
+          return _buildTransactionTile(context,
               entry['data'] as Map<String, dynamic>);
         },
       ),
     );
   }
 
-  List<Map<String, dynamic>> _groupByDate(
-      List<Map<String, dynamic>> items) {
+  List<Map<String, dynamic>> _groupByDate(List<Map<String, dynamic>> items) {
     final result = <Map<String, dynamic>>[];
     String? lastDate;
     for (final item in items) {
@@ -195,13 +174,13 @@ class _TransactionHistoryScreenState
     return names[m];
   }
 
-  Widget _buildDateHeader(String label) {
+  Widget _buildDateHeader(BuildContext context, String label) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(4, 20, 4, 8),
       child: Text(
         label,
         style: TextStyle(
-          color: Colors.white.withAlpha(102),
+          color: AppTheme.textSecondary(context),
           fontSize: 12,
           fontWeight: FontWeight.w700,
           letterSpacing: 0.5,
@@ -210,7 +189,8 @@ class _TransactionHistoryScreenState
     );
   }
 
-  Widget _buildTransactionTile(Map<String, dynamic> tx) {
+  Widget _buildTransactionTile(
+      BuildContext context, Map<String, dynamic> tx) {
     final isSuccess = tx['status'] == 'success';
     final dt = DateTime.parse(tx['created_at'] as String).toLocal();
     final timeStr =
@@ -222,7 +202,7 @@ class _TransactionHistoryScreenState
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
       decoration: BoxDecoration(
-        color: const Color(0xFF1A1A2E),
+        color: AppTheme.card(context),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
           color: isSuccess
@@ -236,8 +216,10 @@ class _TransactionHistoryScreenState
           children: [
             _buildStatusIcon(isSuccess),
             const SizedBox(width: 14),
-            Expanded(child: _buildTileBody(tx, isSuccess, hand, score, timeStr)),
-            if (isSuccess && amount != null) _buildAmount(amount),
+            Expanded(
+                child: _buildTileBody(
+                    context, tx, isSuccess, hand, score, timeStr)),
+            if (isSuccess && amount != null) _buildAmount(context, amount),
           ],
         ),
       ),
@@ -246,8 +228,7 @@ class _TransactionHistoryScreenState
 
   Widget _buildStatusIcon(bool isSuccess) {
     return Container(
-      width: 46,
-      height: 46,
+      width: 46, height: 46,
       decoration: BoxDecoration(
         color: isSuccess
             ? const Color(0xFF059669).withAlpha(38)
@@ -255,9 +236,7 @@ class _TransactionHistoryScreenState
         shape: BoxShape.circle,
       ),
       child: Icon(
-        isSuccess
-            ? Icons.check_circle_rounded
-            : Icons.cancel_rounded,
+        isSuccess ? Icons.check_circle_rounded : Icons.cancel_rounded,
         color: isSuccess ? const Color(0xFF059669) : Colors.red,
         size: 24,
       ),
@@ -265,6 +244,7 @@ class _TransactionHistoryScreenState
   }
 
   Widget _buildTileBody(
+    BuildContext context,
     Map<String, dynamic> tx,
     bool isSuccess,
     String? hand,
@@ -276,8 +256,8 @@ class _TransactionHistoryScreenState
       children: [
         Text(
           tx['user_name'] as String,
-          style: const TextStyle(
-            color: Colors.white,
+          style: TextStyle(
+            color: AppTheme.text(context),
             fontSize: 15,
             fontWeight: FontWeight.w600,
           ),
@@ -285,25 +265,23 @@ class _TransactionHistoryScreenState
         const SizedBox(height: 3),
         Row(
           children: [
-            Text(
-              timeStr,
-              style: TextStyle(
-                  color: Colors.white.withAlpha(102), fontSize: 12),
-            ),
+            Text(timeStr,
+                style: TextStyle(
+                    color: AppTheme.textSecondary(context), fontSize: 12)),
             if (hand != null) ...[
               Text(' · ',
                   style: TextStyle(
-                      color: Colors.white.withAlpha(51), fontSize: 12)),
+                      color: AppTheme.textMuted(context), fontSize: 12)),
               Text(
                 '${hand == 'sağ' ? 'Sağ' : 'Sol'} el',
                 style: TextStyle(
-                    color: Colors.white.withAlpha(102), fontSize: 12),
+                    color: AppTheme.textSecondary(context), fontSize: 12),
               ),
             ],
             if (score != null) ...[
               Text(' · ',
                   style: TextStyle(
-                      color: Colors.white.withAlpha(51), fontSize: 12)),
+                      color: AppTheme.textMuted(context), fontSize: 12)),
               Text(
                 '%${(score * 100).toStringAsFixed(0)}',
                 style: const TextStyle(
@@ -315,23 +293,22 @@ class _TransactionHistoryScreenState
         if (!isSuccess)
           Padding(
             padding: const EdgeInsets.only(top: 3),
-            child: Text(
-              'Eşleşme bulunamadı',
-              style: TextStyle(color: Colors.red.withAlpha(179), fontSize: 11),
-            ),
+            child: Text('Eşleşme bulunamadı',
+                style: TextStyle(
+                    color: Colors.red.withAlpha(179), fontSize: 11)),
           ),
       ],
     );
   }
 
-  Widget _buildAmount(double amount) {
+  Widget _buildAmount(BuildContext context, double amount) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.end,
       children: [
         Text(
           '₺${amount.toStringAsFixed(2)}',
-          style: const TextStyle(
-            color: Colors.white,
+          style: TextStyle(
+            color: AppTheme.text(context),
             fontSize: 16,
             fontWeight: FontWeight.bold,
           ),
