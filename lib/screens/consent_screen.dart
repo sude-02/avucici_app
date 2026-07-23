@@ -6,6 +6,7 @@ import 'onboarding_screen.dart';
 import 'permission_explanation_screen.dart';
 import 'privacy_policy_screen.dart';
 import 'terms_screen.dart';
+import '../utils/app_theme.dart';
 
 class ConsentScreen extends StatefulWidget {
   const ConsentScreen({super.key});
@@ -69,35 +70,34 @@ class _ConsentScreenState extends State<ConsentScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF0A0A1A),
       body: SafeArea(
         child: Column(
           children: [
-            Expanded(child: _buildScrollContent()),
-            _buildBottomSection(),
+            Expanded(child: _buildScrollContent(context)),
+            _buildBottomSection(context),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildScrollContent() {
+  Widget _buildScrollContent(BuildContext context) {
     return SingleChildScrollView(
       padding: const EdgeInsets.fromLTRB(24, 40, 24, 16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildHeader(),
+          _buildHeader(context),
           const SizedBox(height: 36),
-          _buildKeyPoints(),
+          _buildKeyPoints(context),
           const SizedBox(height: 32),
-          _buildCheckboxes(),
+          _buildCheckboxes(context),
         ],
       ),
     );
   }
 
-  Widget _buildHeader() {
+  Widget _buildHeader(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -123,10 +123,10 @@ class _ConsentScreenState extends State<ConsentScreen> {
               color: Colors.white, size: 30),
         ),
         const SizedBox(height: 24),
-        const Text(
+        Text(
           'Devam etmeden önce',
           style: TextStyle(
-            color: Colors.white,
+            color: AppTheme.text(context),
             fontSize: 28,
             fontWeight: FontWeight.bold,
             letterSpacing: -0.5,
@@ -136,7 +136,7 @@ class _ConsentScreenState extends State<ConsentScreen> {
         Text(
           'PalmPay\'i kullanmak için kullanım koşullarını ve gizlilik politikasını kabul etmeniz gerekiyor.',
           style: TextStyle(
-            color: Colors.white.withAlpha(153),
+            color: AppTheme.textSecondary(context),
             fontSize: 15,
             height: 1.55,
           ),
@@ -145,39 +145,43 @@ class _ConsentScreenState extends State<ConsentScreen> {
     );
   }
 
-  Widget _buildKeyPoints() {
+  Widget _buildKeyPoints(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0xFF1A1A2E),
+        color: AppTheme.card(context),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white.withAlpha(13)),
+        border: Border.all(color: AppTheme.border(context)),
       ),
       child: Column(
         children: [
           _buildPoint(
+            context,
             icon: Icons.storage_rounded,
             iconColor: const Color(0xFF3B82F6),
             title: 'Veriler cihazınızda kalır',
             subtitle:
                 'Biyometrik veriniz hiçbir sunucuya gönderilmez.',
           ),
-          _buildPointDivider(),
+          _buildPointDivider(context),
           _buildPoint(
+            context,
             icon: Icons.no_photography_rounded,
             iconColor: const Color(0xFF059669),
             title: 'Görüntüler paylaşılmaz',
             subtitle: 'Kamera görüntüleri üçüncü taraflarla paylaşılmaz.',
           ),
-          _buildPointDivider(),
+          _buildPointDivider(context),
           _buildPoint(
+            context,
             icon: Icons.delete_outline_rounded,
             iconColor: const Color(0xFFF59E0B),
             title: 'Dilediğinizde silebilirsiniz',
             subtitle:
                 'Ayarlar → Verilerimi Sil ile tüm kayıtları silebilirsiniz.',
           ),
-          _buildPointDivider(),
+          _buildPointDivider(context),
           _buildPoint(
+            context,
             icon: Icons.lock_rounded,
             iconColor: const Color(0xFF7C3AED),
             title: 'KVKK uyumlu',
@@ -189,7 +193,8 @@ class _ConsentScreenState extends State<ConsentScreen> {
     );
   }
 
-  Widget _buildPoint({
+  Widget _buildPoint(
+    BuildContext context, {
     required IconData icon,
     required Color iconColor,
     required String title,
@@ -215,15 +220,15 @@ class _ConsentScreenState extends State<ConsentScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(title,
-                    style: const TextStyle(
-                      color: Colors.white,
+                    style: TextStyle(
+                      color: AppTheme.text(context),
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
                     )),
                 const SizedBox(height: 2),
                 Text(subtitle,
                     style: TextStyle(
-                      color: Colors.white.withAlpha(128),
+                      color: AppTheme.textSecondary(context),
                       fontSize: 12,
                       height: 1.4,
                     )),
@@ -235,13 +240,14 @@ class _ConsentScreenState extends State<ConsentScreen> {
     );
   }
 
-  Widget _buildPointDivider() =>
-      Divider(height: 1, indent: 66, color: Colors.white.withAlpha(13));
+  Widget _buildPointDivider(BuildContext context) =>
+      Divider(height: 1, indent: 66, color: AppTheme.border(context));
 
-  Widget _buildCheckboxes() {
+  Widget _buildCheckboxes(BuildContext context) {
     return Column(
       children: [
         _buildCheckboxTile(
+          context,
           checked: _termsChecked,
           onChanged: (v) => setState(() => _termsChecked = v ?? false),
           label: 'Kullanım Koşullarını',
@@ -250,6 +256,7 @@ class _ConsentScreenState extends State<ConsentScreen> {
         ),
         const SizedBox(height: 12),
         _buildCheckboxTile(
+          context,
           checked: _privacyChecked,
           onChanged: (v) => setState(() => _privacyChecked = v ?? false),
           label: 'Gizlilik Politikasını',
@@ -260,7 +267,8 @@ class _ConsentScreenState extends State<ConsentScreen> {
     );
   }
 
-  Widget _buildCheckboxTile({
+  Widget _buildCheckboxTile(
+    BuildContext context, {
     required bool checked,
     required ValueChanged<bool?> onChanged,
     required String label,
@@ -275,12 +283,12 @@ class _ConsentScreenState extends State<ConsentScreen> {
         decoration: BoxDecoration(
           color: checked
               ? const Color(0xFF7C3AED).withAlpha(26)
-              : const Color(0xFF1A1A2E),
+              : AppTheme.card(context),
           borderRadius: BorderRadius.circular(14),
           border: Border.all(
             color: checked
                 ? const Color(0xFF7C3AED).withAlpha(128)
-                : Colors.white.withAlpha(20),
+                : AppTheme.border(context),
             width: checked ? 1.5 : 1,
           ),
         ),
@@ -294,7 +302,7 @@ class _ConsentScreenState extends State<ConsentScreen> {
                 value: checked,
                 onChanged: onChanged,
                 activeColor: const Color(0xFF7C3AED),
-                side: BorderSide(color: Colors.white.withAlpha(77)),
+                side: BorderSide(color: AppTheme.textMuted(context)),
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(5)),
                 materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
@@ -322,7 +330,7 @@ class _ConsentScreenState extends State<ConsentScreen> {
                     Text(
                       ' $linkLabel',
                       style: TextStyle(
-                        color: Colors.white.withAlpha(179),
+                        color: AppTheme.textSecondary(context),
                         fontSize: 14,
                       ),
                     ),
@@ -336,13 +344,13 @@ class _ConsentScreenState extends State<ConsentScreen> {
     );
   }
 
-  Widget _buildBottomSection() {
+  Widget _buildBottomSection(BuildContext context) {
     return Container(
       padding: const EdgeInsets.fromLTRB(24, 12, 24, 32),
       decoration: BoxDecoration(
-        color: const Color(0xFF0A0A1A),
+        color: Theme.of(context).scaffoldBackgroundColor,
         border: Border(
-          top: BorderSide(color: Colors.white.withAlpha(13)),
+          top: BorderSide(color: AppTheme.border(context)),
         ),
       ),
       child: SizedBox(
@@ -354,9 +362,9 @@ class _ConsentScreenState extends State<ConsentScreen> {
             style: ElevatedButton.styleFrom(
               backgroundColor: _canProceed
                   ? const Color(0xFF7C3AED)
-                  : Colors.white.withAlpha(20),
+                  : AppTheme.border(context),
               foregroundColor:
-                  _canProceed ? Colors.white : Colors.white38,
+                  _canProceed ? Colors.white : AppTheme.textMuted(context),
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(18)),
               elevation: 0,

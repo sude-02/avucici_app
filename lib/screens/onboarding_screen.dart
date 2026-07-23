@@ -4,6 +4,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'home_screen.dart';
 import 'permission_explanation_screen.dart';
 import 'register_screen.dart';
+import '../utils/app_theme.dart';
 
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
@@ -95,11 +96,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     final isLast = _currentPage == _pages.length - 1;
 
     return Scaffold(
-      backgroundColor: const Color(0xFF0A0A1A),
       body: SafeArea(
         child: Column(
           children: [
-            _buildTopBar(isLast),
+            _buildTopBar(context, isLast),
             Expanded(
               child: PageView.builder(
                 controller: _pageController,
@@ -108,14 +108,14 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 itemBuilder: (_, i) => _PageContent(page: _pages[i]),
               ),
             ),
-            _buildBottomBar(isLast),
+            _buildBottomBar(context, isLast),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildTopBar(bool isLast) {
+  Widget _buildTopBar(BuildContext context, bool isLast) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(24, 16, 16, 0),
       child: Row(
@@ -133,10 +133,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 color: Colors.white, size: 20),
           ),
           const SizedBox(width: 10),
-          const Text(
+          Text(
             'PalmPay',
             style: TextStyle(
-              color: Colors.white,
+              color: AppTheme.text(context),
               fontSize: 18,
               fontWeight: FontWeight.bold,
             ),
@@ -148,7 +148,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               child: Text(
                 'Atla',
                 style: TextStyle(
-                  color: Colors.white.withAlpha(128),
+                  color: AppTheme.textMuted(context),
                   fontSize: 15,
                 ),
               ),
@@ -158,7 +158,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     );
   }
 
-  Widget _buildBottomBar(bool isLast) {
+  Widget _buildBottomBar(BuildContext context, bool isLast) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(24, 16, 24, 40),
       child: Column(
@@ -199,7 +199,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 child: Text(
                   'Ana Sayfaya Git',
                   style: TextStyle(
-                    color: Colors.white.withAlpha(128),
+                    color: AppTheme.textMuted(context),
                     fontSize: 15,
                   ),
                 ),
@@ -256,7 +256,7 @@ class _PageContent extends StatelessWidget {
           const Spacer(flex: 2),
           _buildIllustration(),
           const SizedBox(height: 56),
-          _buildTexts(),
+          _buildTexts(context),
           const Spacer(flex: 3),
         ],
       ),
@@ -292,14 +292,14 @@ class _PageContent extends StatelessWidget {
     );
   }
 
-  Widget _buildTexts() {
+  Widget _buildTexts(BuildContext context) {
     return Column(
       children: [
         Text(
           page.title,
           textAlign: TextAlign.center,
-          style: const TextStyle(
-            color: Colors.white,
+          style: TextStyle(
+            color: AppTheme.text(context),
             fontSize: 30,
             fontWeight: FontWeight.bold,
             letterSpacing: -0.5,
@@ -310,7 +310,7 @@ class _PageContent extends StatelessWidget {
           page.description,
           textAlign: TextAlign.center,
           style: TextStyle(
-            color: Colors.white.withAlpha(153),
+            color: AppTheme.textSecondary(context),
             fontSize: 16,
             height: 1.65,
           ),
@@ -321,14 +321,14 @@ class _PageContent extends StatelessWidget {
             padding:
                 const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
             decoration: BoxDecoration(
-              color: Colors.white.withAlpha(13),
+              color: AppTheme.card(context),
               borderRadius: BorderRadius.circular(30),
-              border: Border.all(color: Colors.white.withAlpha(26)),
+              border: Border.all(color: AppTheme.border(context)),
             ),
             child: Text(
               page.detail!,
               style: TextStyle(
-                color: Colors.white.withAlpha(179),
+                color: AppTheme.textSecondary(context),
                 fontSize: 13,
                 letterSpacing: 0.3,
               ),
@@ -362,7 +362,7 @@ class _DotIndicator extends StatelessWidget {
             borderRadius: BorderRadius.circular(4),
             color: isActive
                 ? const Color(0xFF7C3AED)
-                : Colors.white.withAlpha(51),
+                : AppTheme.border(context),
           ),
         );
       }),

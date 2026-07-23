@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'home_screen.dart';
+import '../utils/app_theme.dart';
 
 class PermissionExplanationScreen extends StatefulWidget {
   const PermissionExplanationScreen({super.key});
@@ -70,22 +71,24 @@ class _PermissionExplanationScreenState
   void _showSettingsDialog() {
     showDialog(
       context: context,
-      builder: (_) => AlertDialog(
-        backgroundColor: const Color(0xFF1A1A2E),
+      builder: (dialogContext) => AlertDialog(
+        backgroundColor: AppTheme.card(dialogContext),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: const Text(
+        title: Text(
           'Kamera İzni Gerekli',
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+          style: TextStyle(
+              color: AppTheme.text(dialogContext),
+              fontWeight: FontWeight.bold),
         ),
-        content: const Text(
+        content: Text(
           'Kamera izni kalıcı olarak reddedildi. Lütfen uygulama ayarlarından izni etkinleştirin.',
-          style: TextStyle(color: Colors.white70),
+          style: TextStyle(color: AppTheme.textSecondary(dialogContext)),
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('İptal',
-                style: TextStyle(color: Colors.white54)),
+            onPressed: () => Navigator.pop(dialogContext),
+            child: Text('İptal',
+                style: TextStyle(color: AppTheme.textMuted(dialogContext))),
           ),
           TextButton(
             onPressed: () {
@@ -103,7 +106,6 @@ class _PermissionExplanationScreenState
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF0A0A1A),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 32),
@@ -112,7 +114,7 @@ class _PermissionExplanationScreenState
               const Spacer(flex: 2),
               _buildIcon(),
               const SizedBox(height: 48),
-              _buildTexts(),
+              _buildTexts(context),
               const Spacer(flex: 3),
               _buildButton(),
               const SizedBox(height: 48),
@@ -157,13 +159,13 @@ class _PermissionExplanationScreenState
     );
   }
 
-  Widget _buildTexts() {
+  Widget _buildTexts(BuildContext context) {
     return Column(
       children: [
-        const Text(
+        Text(
           'Kamera İzni',
           style: TextStyle(
-            color: Colors.white,
+            color: AppTheme.text(context),
             fontSize: 32,
             fontWeight: FontWeight.bold,
             letterSpacing: -0.5,
@@ -174,18 +176,20 @@ class _PermissionExplanationScreenState
           'Bu uygulama avuç içinizi okumak için\nkameraya ihtiyaç duyar.',
           textAlign: TextAlign.center,
           style: TextStyle(
-            color: Colors.white.withOpacity(0.6),
+            color: AppTheme.textSecondary(context),
             fontSize: 17,
             height: 1.6,
           ),
         ),
         const SizedBox(height: 32),
         _buildFeatureRow(
+          context,
           Icons.security_rounded,
           'Görüntüler cihazınızda işlenir,\nhiçbir yere gönderilmez.',
         ),
         const SizedBox(height: 16),
         _buildFeatureRow(
+          context,
           Icons.back_hand_rounded,
           'Avuç içi damar izi ile\ngüvenli kimlik doğrulama.',
         ),
@@ -193,7 +197,7 @@ class _PermissionExplanationScreenState
     );
   }
 
-  Widget _buildFeatureRow(IconData icon, String text) {
+  Widget _buildFeatureRow(BuildContext context, IconData icon, String text) {
     return Row(
       children: [
         Container(
@@ -212,7 +216,7 @@ class _PermissionExplanationScreenState
           child: Text(
             text,
             style: TextStyle(
-              color: Colors.white.withOpacity(0.55),
+              color: AppTheme.textSecondary(context),
               fontSize: 14,
               height: 1.5,
             ),

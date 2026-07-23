@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../utils/app_theme.dart';
 
 class PrivacyPolicyScreen extends StatelessWidget {
   const PrivacyPolicyScreen({super.key});
@@ -6,17 +7,18 @@ class PrivacyPolicyScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF0A0A1A),
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_rounded, color: Colors.white),
+          icon: Icon(Icons.arrow_back_ios_rounded,
+              color: AppTheme.text(context)),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text(
+        title: Text(
           'Gizlilik Politikası',
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+          style: TextStyle(
+              color: AppTheme.text(context), fontWeight: FontWeight.bold),
         ),
       ),
       body: const SingleChildScrollView(
@@ -111,17 +113,18 @@ class TermsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF0A0A1A),
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_rounded, color: Colors.white),
+          icon: Icon(Icons.arrow_back_ios_rounded,
+              color: AppTheme.text(context)),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text(
+        title: Text(
           'Kullanım Koşulları',
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+          style: TextStyle(
+              color: AppTheme.text(context), fontWeight: FontWeight.bold),
         ),
       ),
       body: const SingleChildScrollView(
@@ -223,11 +226,11 @@ class _LegalContent extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-      children: sections.map((s) => _buildSection(s)).toList(),
+      children: sections.map((s) => _buildSection(context, s)).toList(),
     );
   }
 
-  Widget _buildSection(_Section s) {
+  Widget _buildSection(BuildContext context, _Section s) {
     if (s.isIntro) {
       return Padding(
         padding: const EdgeInsets.only(bottom: 28),
@@ -253,7 +256,7 @@ class _LegalContent extends StatelessWidget {
               Text(
                 s.body,
                 style: TextStyle(
-                  color: Colors.white.withAlpha(179),
+                  color: AppTheme.textSecondary(context),
                   fontSize: 14,
                   height: 1.6,
                 ),
@@ -271,8 +274,8 @@ class _LegalContent extends StatelessWidget {
         children: [
           Text(
             s.title,
-            style: const TextStyle(
-              color: Colors.white,
+            style: TextStyle(
+              color: AppTheme.text(context),
               fontSize: 16,
               fontWeight: FontWeight.bold,
             ),
@@ -281,13 +284,13 @@ class _LegalContent extends StatelessWidget {
           Text(
             s.body,
             style: TextStyle(
-              color: Colors.white.withAlpha(153),
+              color: AppTheme.textSecondary(context),
               fontSize: 14,
               height: 1.7,
             ),
           ),
           const SizedBox(height: 4),
-          Divider(color: Colors.white.withAlpha(13)),
+          Divider(color: AppTheme.border(context)),
         ],
       ),
     );

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../utils/app_theme.dart';
 
 // ── Shimmer engine ────────────────────────────────────────────────────
 
@@ -35,6 +36,11 @@ class _ShimmerState extends State<Shimmer> with SingleTickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = AppTheme.isDark(context);
+    final base = isDark ? const Color(0xFF1E1E35) : const Color(0xFFE4E4EA);
+    final mid = isDark ? const Color(0xFF2E2E50) : const Color(0xFFEDEDF2);
+    final highlight = isDark ? const Color(0xFF383860) : const Color(0xFFF6F6FA);
+
     return AnimatedBuilder(
       animation: _anim,
       builder: (_, __) => ShaderMask(
@@ -42,13 +48,7 @@ class _ShimmerState extends State<Shimmer> with SingleTickerProviderStateMixin {
         shaderCallback: (bounds) => LinearGradient(
           begin: Alignment.centerLeft,
           end: Alignment.centerRight,
-          colors: const [
-            Color(0xFF1E1E35),
-            Color(0xFF2E2E50),
-            Color(0xFF383860),
-            Color(0xFF2E2E50),
-            Color(0xFF1E1E35),
-          ],
+          colors: [base, mid, highlight, mid, base],
           stops: [
             (_anim.value - 0.5).clamp(0.0, 1.0),
             (_anim.value - 0.15).clamp(0.0, 1.0),
@@ -83,7 +83,9 @@ class ShimmerBox extends StatelessWidget {
       width: width,
       height: height,
       decoration: BoxDecoration(
-        color: const Color(0xFF252542),
+        color: AppTheme.isDark(context)
+            ? const Color(0xFF252542)
+            : const Color(0xFFDCDCE4),
         borderRadius: BorderRadius.circular(radius),
       ),
     );
@@ -102,7 +104,7 @@ class ShimmerUserCard extends StatelessWidget {
         margin: const EdgeInsets.only(bottom: 12),
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
         decoration: BoxDecoration(
-          color: const Color(0xFF1A1A2E),
+          color: AppTheme.card(context),
           borderRadius: BorderRadius.circular(16),
         ),
         child: Row(
@@ -141,7 +143,7 @@ class ShimmerTransactionCard extends StatelessWidget {
         margin: const EdgeInsets.only(bottom: 10),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         decoration: BoxDecoration(
-          color: const Color(0xFF1A1A2E),
+          color: AppTheme.card(context),
           borderRadius: BorderRadius.circular(16),
         ),
         child: Row(
